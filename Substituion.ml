@@ -13,7 +13,7 @@ let rec freevars (t:gentyp) : string list =
 	|List(tl) -> (freevars (non_frees, tl))
 	|Fun(tl,tr) ->List.append (freevars (non_frees, tl)) (freevars (non_frees, tr))
 	;;
-(*testcase freevars ([],Fun(Tvar("t1"),Fun(Tvar("t2"),Int)));;*)	
+(*testcase:freevars ([],Fun(Tvar("t1"),Fun(Tvar("t2"),Int)));;*)	
 let rec applyToTypeExp (s:subs) (gentyp_exp:gentyp) : typ =
 	let frees = freevars gentyp_exp in
 	let typ_e = snd(gentyp_exp) in
@@ -25,4 +25,4 @@ let rec applyToTypeExp (s:subs) (gentyp_exp:gentyp) : typ =
 	|List(tl) -> List (applyToTypeExp s (fst(gentyp_exp),tl))
 	|Fun(tl,tr) -> Fun((applyToTypeExp s (fst(gentyp_exp),tl)),(applyToTypeExp s (fst(gentyp_exp),tr)))
 	;;
- 
+(*testcase: applyToTypeExp [("t1",Int)] ([],Fun(Tvar("t1"),Fun(Tvar("t2"),Int))) *) 
