@@ -1,6 +1,6 @@
 open Lambda ;;
 
-let typenv = [("+",([],Fun(Int,Fun(Int,Int)))); (*Int->Int->Int*)
+let init_typenv = [("+",([],Fun(Int,Fun(Int,Int)))); (*Int->Int->Int*)
 	    ("-",([],Fun(Int,Fun(Int,Int))));  (*Int->Int->Int*)
 	    ("*",([],Fun(Int,Fun(Int,Int))));  (*Int->Int->Int*)
 	    ("div",([],Fun(Int,Fun(Int,Int))));  (*Int->Int->Int*)
