@@ -14,9 +14,9 @@ let init_typenv = [("+",([],Fun(Int,Fun(Int,Int)))); (*Int->Int->Int*)
 	    ("isnil",(["a"],Fun(List(Tvar("a")),Bool))) (*forall a. a-list -> Bool*)
 	    ]
             ;;
-let add_entry newe =
+let add_entry newe typenv=
 	    newe @ typenv
 	    ;; 
 
-let find_value_of_id key =
+let find_value_of_id key typenv=
 	     List.assoc key typenv;;
