@@ -61,4 +61,9 @@ let compose (s1:subs) (s2:subs) : subs =
 	;;
 (*testcase: compose [("t2",Int)] [("t1",Fun(Tvar("t2"),Int))];;
 compose [("t2",Int);("t1",Int)] [("t1",Fun(Tvar("t2"),Int))];;
-compose [("t2",Int);("t3",Int)] [("t1",Fun(Tvar("t2"),Int))];;*)
+compose [("t2",Int);("t3",Int)] [("t1",Fun(Tvar("t2"),Int))]
+let x = compare [("t1",Int)] ["t2",Tvar("t1"))];;
+applyToTypeExp x ([],Tvar("t2"));;*)
+
+let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs =
+	 
