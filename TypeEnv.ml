@@ -1,5 +1,8 @@
 open Lambda ;;
 
+type env_entry = string * gentyp  (*env_entry is a pair of string (identifier) and gentyp*)
+type env = env_entry list  (*the environment A is represented by a list whose content is env_entry*)
+
 let init_typenv = [("+",([],Fun(Int,Fun(Int,Int)))); (*Int->Int->Int*)
 	    ("-",([],Fun(Int,Fun(Int,Int))));  (*Int->Int->Int*)
 	    ("*",([],Fun(Int,Fun(Int,Int))));  (*Int->Int->Int*)
@@ -14,9 +17,10 @@ let init_typenv = [("+",([],Fun(Int,Fun(Int,Int)))); (*Int->Int->Int*)
 	    ("isnil",(["a"],Fun(List(Tvar("a")),Bool))) (*forall a. a-list -> Bool*)
 	    ]
             ;;
-let add_entry newe typenv=
-	    newe @ typenv
+let add_entry (newe:env_entry) (typenv:env) : env=
+	    let key = fst(newe) in
+	    [newe] @ (List.remove_assoc key typenv) (*remove the old key's value and update the new value associated with it, if old exists; otherwise, just act as adding a new key value pair*)
 	    ;; 
 
-let find_value_of_id key typenv=
+let find_value_of_id (key:string) (typenv:env) : gentyp=
 	     List.assoc key typenv;;
