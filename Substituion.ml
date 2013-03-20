@@ -48,14 +48,17 @@ let compose (s1:subs) (s2:subs) : subs =
 	in
 	let applied_t = apply_s1_to_t t
 	in
-	let rec add_to_t (y:subs) (u:subs) :subs=
+	let rec add_to_t (y:subs):subs=
 	match y with
 	|[] -> []
 	|e1::left1 -> let typ_v1 = fst(e1) in 
-	(*	if (List.mem_assoc typ_v1 applied_t) then (List.append applied_t (add_to_t left1)) else (List.append (e1::applied_t) (add_to_t left1))   *)
-	if (List.mem_assoc typ_v1 u) then (List.append u (add_to_t left1 u)) else 
-		let newu = e1::u in (List.append newu (add_to_t left1 newu))
+	(*	if (List.mem_assoc typ_v1 applied_t) then (List.append applied_t (add_to_t left1)) else (List.append (e1::applied_t) (add_to_t left1))  *)
+	if (List.mem_assoc typ_v1 applied_t) then (add_to_t left1) else 
+		 ( e1::(add_to_t left1))
 	in
-	add_to_t s1 applied_t
+	List.append (add_to_t s1) applied_t
+	(*applied_t*)
 	;;
-(*testcase: compose [("t2",Int)] [("t1",Fun(Tvar("t2"),Int))];;*)
+(*testcase: compose [("t2",Int)] [("t1",Fun(Tvar("t2"),Int))];;
+compose [("t2",Int);("t1",Int)] [("t1",Fun(Tvar("t2"),Int))];;
+compose [("t2",Int);("t3",Int)] [("t1",Fun(Tvar("t2"),Int))];;*)
