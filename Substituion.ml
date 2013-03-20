@@ -58,3 +58,4 @@ let compose (s1:subs) (s2:subs) : subs =
 	in
 	add_to_t s1 applied_t
 	;;
+(*testcase: compose [("t2",Int)] [("t1",Fun(Tvar("t2"),Int))];;*)
