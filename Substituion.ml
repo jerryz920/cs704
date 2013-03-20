@@ -62,8 +62,37 @@ let compose (s1:subs) (s2:subs) : subs =
 (*testcase: compose [("t2",Int)] [("t1",Fun(Tvar("t2"),Int))];;
 compose [("t2",Int);("t1",Int)] [("t1",Fun(Tvar("t2"),Int))];;
 compose [("t2",Int);("t3",Int)] [("t1",Fun(Tvar("t2"),Int))]
-let x = compare [("t1",Int)] ["t2",Tvar("t1"))];;
-applyToTypeExp x ([],Tvar("t2"));;*)
+let x = compose [("t1",Int)] [("t2",Tvar("t1"))];;
+applyToTypeExp x ([],Tvar("t2"));; the result should be Int according the to on-line note*)
 
+(* check if a variable occurs in a typ expression *)
+let rec occurs (x : string) (t : typ) : bool =
+  	match t with
+  	|Int | Bool | Sym ->false
+  	| Tvar(y) -> x = y
+  	| List(e) -> occurs x e
+	|Fun(e1,e2) -> (occurs x e1) || (occurs x e2)
+	;;
+(*testcase: occurs "t1" (Fun(Int,Tvar("t1")));;
+occurs "t1" (List(Tvar("t1")));;
+occurs "t1" (Fun(Int, List(List(Tvar("t1")))));;
+*)
+(*
+let isTvar (exp:typ) : bool =
+	match exp with 
+	|Tvar(str) -> true
+	|_ -> false
+	;;
+*)
+let get_Tvar_t (exp:typ) : (bool * string) = (*judge whether a typ expression is of type Tvar, this function also return the string t  in Tvar(t)*)
+	match exp with
+	|Tvar(t) -> (true, t)
+	|_ -> (false, "")
+	;;
+(*testcase: get_Tvar_t (Tvar("t1"));; *)
 let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs =
-	 
+	let t1 = get_Tvar_t(expr1) in
+	let t2 = get_Tvar_t(expr2) in 
+	let bool_t1 = fst(t1) and string_t1 = snd(t1) in
+	let bool_t2 = fst(t2) and string_t2 = snd(t2) in
+	if bool_t1 then 
