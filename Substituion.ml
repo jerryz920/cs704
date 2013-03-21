@@ -145,4 +145,5 @@ let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs =
 (*testcase3: expr1 is Fun(Tvar("t1"), Fun(Tvar("t2"),Bool)); expr2 is Fun(Int, Tvar('t3")); s is [] so --- unify [] (Fun(Tvar("t1"), Fun(Tvar("t2"),Bool))) (Fun(Int, Tvar("t3")));; the result is corrent :subs = [("t3", Fun (Tvar "t2", Bool)); ("t1", Int)]   *)
 (*testcase4: expr1 is (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))); expr2 is (Fun(Int,Tvar("t1"))); s is [], so ---unify [] (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))) (Fun(Int,Tvar("t1")));; the result is corrent: Exception: TypeError "unify fail.".     *)
 (*testcase5: expr1 is (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))); expr2 is (Fun(Tvar("t2"),Tvar("t1"))); s is [], so ---unify [] (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))) (Fun(Tvar("t2"),Tvar("t1")));; the result is corrent  *)
-	
+(*testcase6; expr1 is (List(Tvar("t1"))) ; expr2 is (List(Int)); s =[], so ----unify [] (List(Tvar("t1"))) (List(Int));;   result correct *)
+(*testcase7: expr1 is (List(Fun(Int, Bool))); expr2 is (List(Fun(Tvar("t1"),Bool))); s = [], so ---unify [] (List(Fun(Int, Bool))) (List(Fun(Tvar("t1"),Bool)))  ;; result correct *)	
