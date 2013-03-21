@@ -31,7 +31,8 @@ let rec applyToTypeExp (s:subs) (gentyp_exp:gentyp) : typ =
 	|Fun(tl,tr) -> Fun((applyToTypeExp s (fst(gentyp_exp),tl)),(applyToTypeExp s (fst(gentyp_exp),tr)))
 	;;
 (*testcase: applyToTypeExp [("t1",Int)] ([],Fun(Tvar("t1"),Fun(Tvar("t2"),Int))) 
-applyToTypeExp [("t1",Int)] (["t1"],Fun(Tvar("t1"),Fun(Tvar("t2"),Int)))*) 
+applyToTypeExp [("t1",Int)] (["t1"],Fun(Tvar("t1"),Fun(Tvar("t2"),Int)))
+applyToTypeExp    [("t1",Fun(Int,Tvar("t2"));("t2",Int)] ([],(Fun(Tvar("t1"),Fun(Bool,Fun(Tvar("t1"),Tvar("t2"))))))   *) 
 let rec applyToTypeEnv (s:subs) (env_list:env) : env = 
 	match env_list with
 	|[] -> []
