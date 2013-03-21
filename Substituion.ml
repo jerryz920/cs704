@@ -1,7 +1,10 @@
 open Lambda ;;
 open TypeEnv ;;
+open LambdaUtils;;
+open Format;;
 
 type subs = (string * typ) list (*subs is a list of pair (type-variable,unquantified-type-expressions), that is, a list of (string,'typ')*)
+exception TypeError of string  (*I put TypeError here *)
 
 let rec freevars (t:gentyp) : string list = 
 	let non_frees = fst(t) in
@@ -84,15 +87,53 @@ let isTvar (exp:typ) : bool =
 	|_ -> false
 	;;
 *)
-let get_Tvar_t (exp:typ) : (bool * string) = (*judge whether a typ expression is of type Tvar, this function also return the string t  in Tvar(t)*)
+let get_Tvar_t (exp:typ) : (bool * string) = (*judge whether a typ expression is of type Tvar, this function also return the string(type variable) t  in Tvar(t)*)
 	match exp with
 	|Tvar(t) -> (true, t)
 	|_ -> (false, "")
 	;;
 (*testcase: get_Tvar_t (Tvar("t1"));; *)
+let root (exp:typ): string = (*exp must NOT be type of Tvar(something)*) 
+	match exp with
+	|List(e) -> "List"
+	|Fun(e1,e2) -> "Fun"
+	|Int|Bool|Sym -> "Primitive"
+	;;
+(*testcases: root (Fun(Int,Tvar("t1")));;
+root (List(Tvar("t1")));;
+root Int;; root Bool
+root Int = root Bool;;*)
 let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs =
-	let t1 = get_Tvar_t(expr1) in
-	let t2 = get_Tvar_t(expr2) in 
-	let bool_t1 = fst(t1) and string_t1 = snd(t1) in
-	let bool_t2 = fst(t2) and string_t2 = snd(t2) in
-	if bool_t1 then 
+	let tuple_t1 = get_Tvar_t(expr1) in  (*t1 is a tuple (bool,string)*)
+	let tuple_t2 = get_Tvar_t(expr2) in 
+	let bool_t1 = fst(tuple_t1) and string_t1 = snd(tuple_t1) in (*string_t1 is equal to t of the on-line noew in concept*)
+	let bool_t2 = fst(tuple_t2) and string_t2 = snd(tuple_t2) in
+	
+	let bool_s_has_key_t1 = (List.mem_assoc string_t1 s) in (*to see whether s has a <key,value> mapping with t1(string) as the key*)
+	if bool_t1 then                                       (*if (exp1 is TYPEVAR(t))*) 
+			(if (bool_t2 && string_t1 = string_t2) then s (*if (exp2 is also TYPEVAR(t)  then s*)
+			else (if (occurs string_t1 expr2) then (raise (TypeError "unify fail."))   (*else if (t occurs in exp2) return FAIL*)
+			     else (if  bool_s_has_key_t1 then (unify s (List.assoc string_t1 s) expr2) (*	else if (S maps t to some type expression e) return Unify(S, e, exp2)
+													 ;s is type of subs; so (List.mem_assoc string_t1 s) is type if typ*)
+			          else (let expr2_dot = applyToTypeExp s ([],expr2) in (*	else let exp2' = S(exp2) in*) 
+				       let expr2_dot_t = get_Tvar_t(expr2_dot) in
+				       let bool_expr2_dot_t = fst(expr2_dot_t) and string_expr2_dot_t = snd(expr2_dot_t) in
+				           (if (bool_expr2_dot_t && string_expr2_dot_t = string_t1) then s (*if (exp2' is TYPEVAR(t)) return S *)
+				           else if (occurs string_t1  expr2) then (raise (TypeError "unify fail.")) (*else if (t occurs in exp2') return FAIL*)
+				                else (compose [(string_t1, expr2_dot)] s) (*else return t:exp2' o S ; please note that function compose requires two parameters with type of subs*)
+					   )
+				      )
+				  )
+			    )
+			) (*coressponding to if*)
+	(*else if bool_t2 then (unify expr2 expr1) (*if (exp2 is TYPEVAR(t)) return unify(S, exp2, exp1) *) 
+	(*here if neither exp1 nor exp2 is a type variable, i.e., is not type of Tvar(something)*)
+	else if (not (root (expr1) = root (expr2))) then (raise (TypeError "unify fail.")) (*if (root(exp1) ≠ root(exp2)) return FAIL*)
+	else if ( (root (expr1) = "Primitive" ) && (root (expr2) = "Primitive" ) ) then s (*if (root(exp1) and root(exp2) are primitive types)  return s*)
+	else if ( (root (expr1) = "Fun")) then let next_sub =
+						match expr1, expr2 with
+						|Fun(e1,e2),Fun(e3,e4) -> let new_sub = unify s e1 e3 in unify new_sub e2 e4
+				                in next_sub 
+	*)
+	else s
+	;;	
