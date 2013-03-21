@@ -126,14 +126,23 @@ let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs =
 				  )
 			    )
 			) (*coressponding to if*)
-	(*else if bool_t2 then (unify expr2 expr1) (*if (exp2 is TYPEVAR(t)) return unify(S, exp2, exp1) *) 
+	else if bool_t2 then (unify s expr2 expr1) (*if (exp2 is TYPEVAR(t)) return unify(S, exp2, exp1) *) 
 	(*here if neither exp1 nor exp2 is a type variable, i.e., is not type of Tvar(something)*)
 	else if (not (root (expr1) = root (expr2))) then (raise (TypeError "unify fail.")) (*if (root(exp1) ≠ root(exp2)) return FAIL*)
 	else if ( (root (expr1) = "Primitive" ) && (root (expr2) = "Primitive" ) ) then s (*if (root(exp1) and root(exp2) are primitive types)  return s*)
-	else if ( (root (expr1) = "Fun")) then let next_sub =
+	else if ( (root (expr1) = "Fun") && (root (expr2) = "Fun")) then 
 						match expr1, expr2 with
 						|Fun(e1,e2),Fun(e3,e4) -> let new_sub = unify s e1 e3 in unify new_sub e2 e4
-				                in next_sub 
-	*)
-	else s
-	;;	
+				               
+	else if ( (root (expr1) = "List") && ( root (expr2) = "List")) then
+						match expr1, expr2 with
+						|List(ex1), List(ex2) -> unify s ex1 ex2
+	else (raise (TypeError "unify fail."))
+	;;
+
+(*testcase1 : expr1 is Fun(Int, Bool); expr2 is Fun(Tvar("t1"),Bool); s =[] so  ----unify [] (Fun(Int, Bool)) (Fun(Tvar("t1"),Bool));; the returned result is corrent: subs = [("t1", Int)]*)
+(*testcase2:  expr1 is Fun(Tvar("t1"),Fun(Tvar("t2"),Int)); expr2 is Fun(Int, Fun(Bool, Tvar("t1"))); s = [], so unify [] (Fun(Tvar("t1"),Fun(Tvar("t2"),Int))) (Fun(Int, Fun(Bool, Tvar("t1"))));; the result is correct: subs = [("t2", Bool); ("t1", Int)]  *)
+(*testcase3: expr1 is Fun(Tvar("t1"), Fun(Tvar("t2"),Bool)); expr2 is Fun(Int, Tvar('t3")); s is [] so --- unify [] (Fun(Tvar("t1"), Fun(Tvar("t2"),Bool))) (Fun(Int, Tvar("t3")));; the result is corrent :subs = [("t3", Fun (Tvar "t2", Bool)); ("t1", Int)]   *)
+(*testcase4: expr1 is (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))); expr2 is (Fun(Int,Tvar("t1"))); s is [], so ---unify [] (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))) (Fun(Int,Tvar("t1")));; the result is corrent: Exception: TypeError "unify fail.".     *)
+(*testcase5: expr1 is (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))); expr2 is (Fun(Tvar("t2"),Tvar("t1"))); s is [], so ---unify [] (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))) (Fun(Tvar("t2"),Tvar("t1")));; the result is corrent  *)
+	
