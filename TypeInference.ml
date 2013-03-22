@@ -2,10 +2,10 @@ open Lambda;;
 open LambdaUtils;;
 open Format;;
 open Substituion;;
+open TypeEnv
+exception TypeError of string (*I put it in Substituion.ml *)
 
-(*exception TypeError of string*) (*I put it in Substituion.ml *)
-
-let typ_inference e = raise (TypeError "Implement me.")
+(*let typ_inference e = raise (TypeError "Implement me.")*)
 
 let var_counter = ref 0;;
  
@@ -87,3 +87,5 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 			let tao = deta in
 			(t, tao)
 	;;
+
+let typ_inference e = let (t, tao ) = algw init_typenv e in tao;;
