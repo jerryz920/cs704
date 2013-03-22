@@ -1,0 +1,8 @@
+(((lambda (f)
+  (lambda (y)
+      (y f)
+  )
+ )
+ 17)
+ (lambda (x) ((+ x) 6))
+)

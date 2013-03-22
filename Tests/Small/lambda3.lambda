@@ -1,0 +1,12 @@
+(lambda (a)
+  (lambda (b)
+    (lambda (c)
+      (lambda (d)
+        (if ((== a) 'one)
+         then b
+         else ((cons c) d) 
+	)
+      )
+    )
+  )
+)

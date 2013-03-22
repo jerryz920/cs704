@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Default testing definitions for Program 2.
+
+type_error="Type checking failed "
+test_t=300
+
+function say {
+    echo "*** $1 ***"
+}
+
+function details {
+    echo "  $1"
+}
+
+function test_contents {
+    subtest=$(basename $1)
+    num_tests=0
+    num_correct=0
+
+    mkdir -p _Tests/${subtest}
+
+    for f in Tests/${subtest}/*.lambda
+    do
+       let num_tests++
+        root=${f%.lambda}
+        chk=_${root}.out.typ
+        # Perform type inference.
+        ./timeout ${test_t} ./Infer.d.byte $f > $chk
+
+        # Check result.
+        if [[ $? = 124 ]] # timeout
+        then details "$root: Type inference timeout after $test_t seconds."
+        elif grep -q 'Parse error' $chk
+        then say "Test case $f does not parse!"
+        elif [[ -e $root.typ ]]
+        then # $root.typ exists, so chk is correct iff it equals $root.typ.
+            if ./CheckEqual.d.byte $chk $root.typ
+            then let num_correct++
+            else details "$root: Type inference incorrect."
+            fi
+        else # $root.typ does not exist, so chk is correct iff it's an error.
+            if grep -q "$type_error" $chk
+            then let num_correct++
+            else details "$root: Type inference incorrect; expected an error."
+            fi
+        fi
+#        rm chk
+    done
+    say "$subtest: $num_correct/$num_tests type inferences correct"
+}

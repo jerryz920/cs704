@@ -1,0 +1,2 @@
+(lambda (c)
+  (lambda (d) ((cons c) d)))

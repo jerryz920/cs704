@@ -1,0 +1,4 @@
+#!/bin/bash
+
+exec ocamlbuild  Infer.d.byte CheckEqual.d.byte
+

@@ -1,0 +1,7 @@
+(let (s = (lambda (x) (lambda (y) (lambda (z) ((x z)(y z)))))) in
+  (let (i = (lambda (x) x)) in
+    ((s i) i)
+  )
+)
+
+

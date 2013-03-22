@@ -1,0 +1,7 @@
+((((lambda (x)
+  (lambda (y)
+    (lambda (x)
+      x
+     )
+   )
+) true) 'a) 22)

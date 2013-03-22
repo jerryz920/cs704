@@ -1,0 +1,5 @@
+(let (and = (lambda (p) (lambda (q) (if p then q else false)))) in
+  (let (or = (lambda (p) (lambda (q) (if p then true else q)))) in
+    (let (xor = (lambda (p) (lambda (q)
+                   (if p then (if q then false else true) else q)))) in
+     ((cons and) ((cons or) ((cons xor) nil))) )))

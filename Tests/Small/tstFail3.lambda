@@ -1,0 +1,1 @@
+(lambda (f) (lambda (g) (if ((< f) g) then (f 1) else (g 2))))

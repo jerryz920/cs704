@@ -1,0 +1,8 @@
+(lambda (w)
+  (lambda (x)
+    (lambda (y)
+       (if true then (x y) else (w (x true)))
+    )
+  )
+)
+

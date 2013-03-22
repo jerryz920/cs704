@@ -1,0 +1,4 @@
+(letrec (f = (lambda (f) 0)) in f)
+
+
+

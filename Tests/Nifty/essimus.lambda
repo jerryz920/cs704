@@ -1,0 +1,29 @@
+(letrec 
+      (divit   = (lambda (a)
+                   (lambda (b)
+		     (lambda (c)
+		       (lambda (d)
+		         (lambda (e)
+			   (if ((> (a e)) 0) then e else 'Vitates))))))) in
+        (letrec
+          (essimus = (lambda (a)
+                       (lambda (b)
+                         (lambda (c)
+                           (lambda (d)
+                             (lambda (e) (car c))))))) in
+         (letrec
+          (haessum = (lambda (a)
+                       (lambda (b)
+                         (lambda (c)
+                           (lambda (d)
+                             (lambda (e) (((((haessum b) a) c) (cdr d)) e))))))) in
+             ((cons divit)
+	           ((cons essimus)
+	                 ((cons haessum) nil)
+	           )
+             )
+	 )
+      )
+)
+
+      

@@ -1,0 +1,4 @@
+(letrec (a = 2) in
+  (letrec (b = ((+ 1) a)) in
+    ((+ a) b)))
+    

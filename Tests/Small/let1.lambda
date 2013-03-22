@@ -1,0 +1,4 @@
+(let (x = (lambda (foo) ((+ foo) 3))) in
+  (let (y = (lambda (bar) ((* bar) 2))) in
+     (x (y (x (y 3))))))
+    

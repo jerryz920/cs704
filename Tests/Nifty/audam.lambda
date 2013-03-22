@@ -1,0 +1,11 @@
+(let (id = (lambda (a) a)) in
+ (let (audam = (lambda (a)
+                  (lambda (b)
+                    (if (id a) then ((+ b) b) else (id b))
+		  )
+		)
+       ) in
+    audam
+ )
+)
+            

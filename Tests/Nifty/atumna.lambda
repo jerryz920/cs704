@@ -1,0 +1,13 @@
+(let (atumna = (lambda (x) (lambda (y) (lambda (z) x)))) in
+  (let (eiecum = (lambda (x) (lambda (y) (lambda (z) y)))) in
+     (lambda (a)
+       (lambda (b)
+         (lambda (c)
+           (if a then (((atumna b) c) a)
+            else (((eiecum c) b) a)
+	   )
+         )
+       )
+     ) 
+  )
+)

@@ -1,0 +1,7 @@
+(letrec (nysit = (lambda (x)
+	            (lambda (y)
+                      (if (if ((== x) 0) then false else true)
+	 	       then ((nysit 0) true)
+		       else y)))) in
+        nysit 
+)

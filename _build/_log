@@ -1,0 +1,76 @@
+### Starting build.
+# Target: Infer.ml.depends, tags: { extension:ml, file:Infer.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules Infer.ml > Infer.ml.depends # cached
+# Target: LambdaUtils.mli.depends, tags: { extension:mli, file:LambdaUtils.mli, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules LambdaUtils.mli > LambdaUtils.mli.depends # cached
+# Target: Lambda.ml.depends, tags: { extension:ml, file:Lambda.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules Lambda.ml > Lambda.ml.depends # cached
+# Target: Lambda.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Lambda.cmo, file:Lambda.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o Lambda.cmo Lambda.ml # cached
+# Target: LambdaUtils.cmi, tags: { byte, compile, extension:mli, file:LambdaUtils.mli, interf, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o LambdaUtils.cmi LambdaUtils.mli # cached
+# Target: Parseargs.ml.depends, tags: { extension:ml, file:Parseargs.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules Parseargs.ml > Parseargs.ml.depends # cached
+# Target: Parseargs.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Parseargs.cmo, file:Parseargs.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o Parseargs.cmo Parseargs.ml # cached
+# Target: TypeInference.mli.depends, tags: { extension:mli, file:TypeInference.mli, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules TypeInference.mli > TypeInference.mli.depends # cached
+# Target: TypeInference.cmi, tags: { byte, compile, extension:mli, file:TypeInference.mli, interf, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o TypeInference.cmi TypeInference.mli # cached
+# Target: Infer.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Infer.cmo, file:Infer.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o Infer.cmo Infer.ml # cached
+# Target: Infer.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:Infer.d.cmo, file:Infer.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o Infer.d.cmo Infer.ml # cached
+# Target: LambdaUtils.ml.depends, tags: { extension:ml, file:LambdaUtils.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules LambdaUtils.ml > LambdaUtils.ml.depends # cached
+# Target: LambdaLex.mll, tags: { extension:mll, file:LambdaLex.mll, lexer, ocaml, ocamllex, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamllex.opt -q LambdaLex.mll # cached
+# Target: LambdaLex.ml.depends, tags: { extension:ml, file:LambdaLex.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules LambdaLex.ml > LambdaLex.ml.depends # cached
+# Target: LambdaParse.mly, tags: { extension:mly, file:LambdaParse.mly, ocaml, ocamlyacc, parser, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlyacc LambdaParse.mly # cached
+# Target: LambdaParse.mli.depends, tags: { extension:mli, file:LambdaParse.mli, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules LambdaParse.mli > LambdaParse.mli.depends # cached
+# Target: LambdaParse.cmi, tags: { byte, compile, extension:mli, file:LambdaParse.mli, interf, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o LambdaParse.cmi LambdaParse.mli # cached
+# Target: LambdaLex.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:LambdaLex.cmo, file:LambdaLex.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o LambdaLex.cmo LambdaLex.ml # cached
+# Target: LambdaUtils.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:LambdaUtils.d.cmo, file:LambdaUtils.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o LambdaUtils.d.cmo LambdaUtils.ml # cached
+# Target: Parseargs.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:Parseargs.d.cmo, file:Parseargs.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o Parseargs.d.cmo Parseargs.ml # cached
+# Target: TypeInference.ml.depends, tags: { extension:ml, file:TypeInference.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules TypeInference.ml > TypeInference.ml.depends # cached
+# Target: Substituion.ml.depends, tags: { extension:ml, file:Substituion.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules Substituion.ml > Substituion.ml.depends # cached
+# Target: TypeEnv.ml.depends, tags: { extension:ml, file:TypeEnv.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules TypeEnv.ml > TypeEnv.ml.depends # cached
+# Target: TypeEnv.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:TypeEnv.cmo, file:TypeEnv.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o TypeEnv.cmo TypeEnv.ml # cached
+# Target: Substituion.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Substituion.cmo, file:Substituion.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o Substituion.cmo Substituion.ml # cached
+# Target: TypeInference.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:TypeInference.d.cmo, file:TypeInference.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o TypeInference.d.cmo TypeInference.ml # cached
+# Target: Lambda.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:Lambda.d.cmo, file:Lambda.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o Lambda.d.cmo Lambda.ml # cached
+# Target: LambdaLex.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:LambdaLex.d.cmo, file:LambdaLex.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o LambdaLex.d.cmo LambdaLex.ml # cached
+# Target: LambdaParse.ml.depends, tags: { extension:ml, file:LambdaParse.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules LambdaParse.ml > LambdaParse.ml.depends # cached
+# Target: LambdaParse.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:LambdaParse.d.cmo, file:LambdaParse.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o LambdaParse.d.cmo LambdaParse.ml # cached
+# Target: Substituion.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:Substituion.d.cmo, file:Substituion.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o Substituion.d.cmo Substituion.ml # cached
+# Target: TypeEnv.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:TypeEnv.d.cmo, file:TypeEnv.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o TypeEnv.d.cmo TypeEnv.ml # cached
+# Target: Infer.d.byte, tags: { byte, debug, dont_link_with, extension:byte, file:Infer.d.byte, link, ocaml, program, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -g Lambda.d.cmo LambdaParse.d.cmo LambdaLex.d.cmo LambdaUtils.d.cmo Parseargs.d.cmo TypeEnv.d.cmo Substituion.d.cmo TypeInference.d.cmo Infer.d.cmo -o Infer.d.byte # cached
+# Target: CheckEqual.ml.depends, tags: { extension:ml, file:CheckEqual.ml, ocaml, ocamldep, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules CheckEqual.ml > CheckEqual.ml.depends # cached
+# Target: CheckEqual.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:CheckEqual.cmo, file:CheckEqual.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o CheckEqual.cmo CheckEqual.ml # cached
+# Target: CheckEqual.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:CheckEqual.d.cmo, file:CheckEqual.ml, implem, ocaml, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o CheckEqual.d.cmo CheckEqual.ml # cached
+# Target: CheckEqual.d.byte, tags: { byte, debug, dont_link_with, extension:byte, file:CheckEqual.d.byte, link, ocaml, program, quiet }
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -g Lambda.d.cmo LambdaParse.d.cmo LambdaLex.d.cmo LambdaUtils.d.cmo Parseargs.d.cmo TypeEnv.d.cmo Substituion.d.cmo TypeInference.d.cmo CheckEqual.d.cmo -o CheckEqual.d.byte # cached
+# Compilation successful.
