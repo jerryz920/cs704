@@ -44,9 +44,9 @@ let gen (x:string) (p:typ) (env_a:env) : gentyp =
 	;;
 (*testcase: let a = add_entry ("f", (["t1"], Fun(Tvar("t1"),Int))) init_typenv;;
 gen "f" (Fun(Tvar("t1"),Fun((Tvar("t2"),Tvar("t3"))))) a;;*)  
-let rec algw (env_a:env) (e:expr) : (subs * typ) =
+let rec algw (env_a:env) (e:expr) : (subs * typ) = 
 	match e with
-	|Val(v) -> let val_typ =  
+        |Val(v) -> let val_typ =  
 		match v with 
 		|Number(n) -> ([],Int)
 		|Boolean(b) -> ([],Bool)
@@ -56,14 +56,32 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 				 ([], List(p1_typ))
 		|Nil -> ([],List(Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))]))) (*When Val matches with Nil, a new type is generated and the type of Nil is List(the new type variable)*)
 		in val_typ
-	|Var(s) -> if (List.mem_assoc s env_a) then ([],spec s env_a)  else raise (TypeError "algw fail.")  (*  T is I,i.e., [] and tao is the result from function spec  if env_a has a key x; otherwise raise error   *) 
+        |Var(s) -> if (List.mem_assoc s env_a) then 
+          ( print_string "var: ";
+          print_expr e;
+          print_string " ";
+          print_typ (spec s env_a);
+          print_string "\n";
+          ([],spec s env_a) ) else raise (TypeError "algw fail.")  (*  T is I,i.e., [] and tao is the result from function spec  if env_a has a key x; otherwise raise error   *) 
 	
-	|Apply(e1,e2) -> let (r, rou) = algw env_a e1 in
+        |Apply(e1,e2) -> let (r, rou) = algw env_a e1 in
 			 let (s, deta) = algw (applyToTypeEnv r env_a) e2 in
-			 let beta = Fun(deta,Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))])) in
-			 let u = unify [] (applyToTypeExp s ([],rou)) (Fun(deta, beta))  in
-			 ((compose (compose u s) r), (applyToTypeExp u ([],beta)))
-	|If(p,e1,e2) -> let (r, rou) = algw env_a p in
+                         let beta = Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))]) in
+                         let u = print_string "begin\n";
+                         unify [] (applyToTypeExp s ([], rou)) (Fun(deta, beta)) in
+                         let tao = applyToTypeExp u ([], beta) in
+                         print_expr e;
+                         print_string "begin***\nrou: ";
+                         print_typ rou;
+                         print_string "\ndeta: ";
+                         print_typ deta;
+                         print_string "\nbeta: ";
+                         print_typ beta;
+                         print_string "\ntao: ";
+                         print_typ tao;
+                         print_string "\n***end\n";
+			 ((compose (compose u s) r), tao)
+        |If(p,e1,e2) -> let (r, rou) = algw env_a p in
 			let u1 = unify [] rou Bool in
 			let u1r = compose u1 r in
 			let (s1, deta1) = algw (applyToTypeEnv u1r env_a) e1 in
@@ -72,12 +90,37 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 			let u2 = unify [] (applyToTypeExp s2 ([],deta1)) deta2 in
 			let t = compose (compose (compose (compose u2 s2) s1) u1 ) r in 
 			let tao = applyToTypeExp u2 ([], deta2) in
+                         print_string "if ";
+                         print_expr p;
+                         print_string " then ";
+                         print_expr e1;
+                         print_string " else "; 
+                         print_expr e2; 
+                         print_string "endif\n"; 
+                         print_string "\nbegin***\nrou: ";
+                         print_typ rou;
+                         print_string "\ndeta1: ";
+                         print_typ deta1;
+                         print_string "\ndeta2: ";
+                         print_typ deta2;
+                         print_string "\n tao: ";
+                         print_typ tao;
+                         print_string "\n***end\n";
 			(t, tao)
 	|Lambda(x, f) -> let beta = Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))]) in
 			 let ax_beta = add_entry (x,([],beta)) env_a in (*add_entry is defined in TypeEnv.ml*)
 			 let (r, rou) = algw ax_beta f in
 			 let t = r in
 	    		 let tao = applyToTypeExp r ([],Fun(beta, rou)) in
+                         print_string "Lambda: ";
+                         print_string x;
+                         print_string ". ";
+                         print_expr f;
+                         print_string "\nbegin***\nrou: ";
+                         print_typ rou;
+                         print_string "\ntao: ";
+                         print_typ tao;
+                         print_string "\n***end\n";
 			 (t, tao)
 	
 	|Let((x,f),g) -> let (r, rou) = algw env_a f in

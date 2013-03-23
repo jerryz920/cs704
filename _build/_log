@@ -40,7 +40,7 @@
 # Target: Parseargs.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:Parseargs.d.cmo, file:Parseargs.ml, implem, ocaml, quiet }
 /unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o Parseargs.d.cmo Parseargs.ml # cached
 # Target: TypeInference.ml.depends, tags: { extension:ml, file:TypeInference.ml, ocaml, ocamldep, quiet }
-/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules TypeInference.ml > TypeInference.ml.depends # cached
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules TypeInference.ml > TypeInference.ml.depends
 # Target: Substituion.ml.depends, tags: { extension:ml, file:Substituion.ml, ocaml, ocamldep, quiet }
 /unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules Substituion.ml > Substituion.ml.depends # cached
 # Target: TypeEnv.ml.depends, tags: { extension:ml, file:TypeEnv.ml, ocaml, ocamldep, quiet }
@@ -50,7 +50,12 @@
 # Target: Substituion.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Substituion.cmo, file:Substituion.ml, implem, ocaml, quiet }
 /unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -o Substituion.cmo Substituion.ml # cached
 # Target: TypeInference.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:TypeInference.d.cmo, file:TypeInference.ml, implem, ocaml, quiet }
-/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o TypeInference.d.cmo TypeInference.ml # cached
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o TypeInference.d.cmo TypeInference.ml
++ /unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o TypeInference.d.cmo TypeInference.ml
+File "TypeInference.ml", line 48, characters 1-4182:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Letrec (_, _)
 # Target: Lambda.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:Lambda.d.cmo, file:Lambda.ml, implem, ocaml, quiet }
 /unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o Lambda.d.cmo Lambda.ml # cached
 # Target: LambdaLex.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:LambdaLex.d.cmo, file:LambdaLex.ml, implem, ocaml, quiet }
@@ -64,7 +69,7 @@
 # Target: TypeEnv.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:TypeEnv.d.cmo, file:TypeEnv.ml, implem, ocaml, quiet }
 /unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o TypeEnv.d.cmo TypeEnv.ml # cached
 # Target: Infer.d.byte, tags: { byte, debug, dont_link_with, extension:byte, file:Infer.d.byte, link, ocaml, program, quiet }
-/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -g Lambda.d.cmo LambdaParse.d.cmo LambdaLex.d.cmo LambdaUtils.d.cmo Parseargs.d.cmo TypeEnv.d.cmo Substituion.d.cmo TypeInference.d.cmo Infer.d.cmo -o Infer.d.byte # cached
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -g Lambda.d.cmo LambdaParse.d.cmo LambdaLex.d.cmo LambdaUtils.d.cmo Parseargs.d.cmo TypeEnv.d.cmo Substituion.d.cmo TypeInference.d.cmo Infer.d.cmo -o Infer.d.byte
 # Target: CheckEqual.ml.depends, tags: { extension:ml, file:CheckEqual.ml, ocaml, ocamldep, quiet }
 /unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamldep.opt -modules CheckEqual.ml > CheckEqual.ml.depends # cached
 # Target: CheckEqual.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:CheckEqual.cmo, file:CheckEqual.ml, implem, ocaml, quiet }
@@ -72,5 +77,5 @@
 # Target: CheckEqual.d.cmo, tags: { byte, compile, debug, extension:cmo, extension:ml, file:CheckEqual.d.cmo, file:CheckEqual.ml, implem, ocaml, quiet }
 /unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -c -g -o CheckEqual.d.cmo CheckEqual.ml # cached
 # Target: CheckEqual.d.byte, tags: { byte, debug, dont_link_with, extension:byte, file:CheckEqual.d.byte, link, ocaml, program, quiet }
-/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -g Lambda.d.cmo LambdaParse.d.cmo LambdaLex.d.cmo LambdaUtils.d.cmo Parseargs.d.cmo TypeEnv.d.cmo Substituion.d.cmo TypeInference.d.cmo CheckEqual.d.cmo -o CheckEqual.d.byte # cached
+/unsup/ocaml-3.12.1/amd64_rhel6/bin/ocamlc.opt -g Lambda.d.cmo LambdaParse.d.cmo LambdaLex.d.cmo LambdaUtils.d.cmo Parseargs.d.cmo TypeEnv.d.cmo Substituion.d.cmo TypeInference.d.cmo CheckEqual.d.cmo -o CheckEqual.d.byte
 # Compilation successful.
