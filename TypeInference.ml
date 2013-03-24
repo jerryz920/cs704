@@ -89,9 +89,12 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 		|Number(n) -> ([],Int)
 		|Boolean(b) -> ([],Bool)
 		|Symbol(s) -> ([],Sym)
-		|Pair(p1,p2) -> let p1_subs_typ = algw env_a (Val(p1)) in   (*the notes say that lists are homogeneous; so Pair(p1,p2) 's type should be List(p1_typ). where p1_typ is p1's type; we need to raise a TypeError if p2's type is not List(p1's typ)*)
-			        let p1_typ = snd(p1_subs_typ) in
-				 ([], List(p1_typ))
+		|Pair(p1,p2) -> (*let p1_subs_typ = algw env_a (Val(p1)) in   (*the notes say that lists are homogeneous; so Pair(p1,p2) 's type should be List(p1_typ). where p1_typ is p1's type; we need to raise a TypeError if p2's type is not List(p1's typ)*)
+			        let p1_typ = snd(p1_subs_typ) in*)
+			let (s1,t1) = algw env_a (Val(p1)) in   (*the notes say that lists are homogeneous; so Pair(p1,p2) 's type should be List(p1_typ). where p1_typ is p1's type; we need to raise a TypeError if p2's type is not List(p1's typ)*)
+                                let (s2,t2) = algw (applyToTypeEnv s1 env_a) (Val(p2)) in
+                                let u = unify [] (List(t1)) t2 in
+                                 ([], List(t1))
 		|Nil -> ([],List(Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))]))) (*When Val matches with Nil, a new type is generated and the type of Nil is List(the new type variable)*)
 		in val_typ
         |Var(s) -> if (List.mem_assoc s env_a) then 
