@@ -4,7 +4,7 @@ open LambdaUtils;;
 open Format;;
 
 type subs = (string * typ) list (*subs is a list of pair (type-variable,unquantified-type-expressions), that is, a list of (string,'typ')*)
-exception TypeError of string  (*I put TypeError here *)
+exception TypeError of string (*I put TypeError here *)
 
 let rec freevars (t:gentyp) : string list = 
 	let non_frees = fst(t) in
@@ -98,15 +98,23 @@ let root (exp:typ): string = (*exp must NOT be type of Tvar(something)*)
 	match exp with
 	|List(e) -> "List"
 	|Fun(e1,e2) -> "Fun"
-	|Int|Bool|Sym -> "Primitive"
+	|Int -> "Int"
+	|Bool -> "Bool"
+	|Sym -> "Sym"
         |_ -> "Tvar"
 	;;
 (*testcases: root (Fun(Int,Tvar("t1")));;
 root (List(Tvar("t1")));;
 root Int;; root Bool
 root Int = root Bool;;*)
-let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs = print_string "unify: "; print_typ expr1;
-        print_string " typ1 "; print_typ expr2; print_string " typ2\n";
+let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs = 
+	print_string "\nunify: \n";
+        print_string "\n typ1 \n"; 
+	print_typ expr1; 
+	print_string "\n typ2\n";
+	print_typ expr2;
+	print_string "\n root of expr1 "; print_string (root expr1);print_string "\n";
+	print_string "\n root of expr2 "; print_string (root expr2);print_string "\n"; 
 	let tuple_t1 = get_Tvar_t(expr1) in  (*t1 is a tuple (bool,string)*)
 	let tuple_t2 = get_Tvar_t(expr2) in 
 	let bool_t1 = fst(tuple_t1) and string_t1 = snd(tuple_t1) in (*string_t1 is equal to t of the on-line noew in concept*)
@@ -131,8 +139,10 @@ let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs = print_string "unify: "; 
 			) (*coressponding to if*)
 	else if bool_t2 then (unify s expr2 expr1) (*if (exp2 is TYPEVAR(t)) return unify(S, exp2, exp1) *) 
 	(*here if neither exp1 nor exp2 is a type variable, i.e., is not type of Tvar(something)*)
-        else if (not (root (expr1) = root (expr2))) then ( raise (TypeError "unify fail3.")) (*if (root(exp1) ≠ root(exp2)) return FAIL*)
-	else if ( (root (expr1) = "Primitive" ) && (root (expr2) = "Primitive" ) ) then s (*if (root(exp1) and root(exp2) are primitive types)  return s*)
+        else if (not (root (expr1) = root (expr2))) then ( raise (TypeError "unify fail3")) (*if (root(exp1) ≠ root(exp2)) return FAIL*)
+	else if ( (root (expr1) = "Int" ) && (root (expr2) = "Int" ) ) then s (*if (root(exp1) and root(exp2) are primitive types)  return s*)
+	else if ( (root (expr1) = "Bool" ) && (root (expr2) = "Bool" ) ) then s (*if (root(exp1) and root(exp2) are primitive types)  return s*)
+	else if ( (root (expr1) = "Sym" ) && (root (expr2) = "Sym" ) ) then s (*if (root(exp1) and root(exp2) are primitive types)  return s*)
 	else if ( (root (expr1) = "Fun") && (root (expr2) = "Fun")) then 
 						match expr1, expr2 with
 						|Fun(e1,e2),Fun(e3,e4) -> let new_sub = unify s e1 e3 in unify new_sub e2 e4

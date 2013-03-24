@@ -6,7 +6,29 @@ open TypeEnv
 exception TypeError of string (*I put it in Substituion.ml *)
 
 (*let typ_inference e = raise (TypeError "Implement me.")*)
-
+type subs_entry = string * typ;;
+let print_subs_e (e:subs_entry) =
+	print_string (fst(e));
+	print_string ";";
+	print_typ (snd(e));
+	print_string "\n";
+	;;
+let print_subs (s:subs) = 
+	List.iter print_subs_e s
+	;;
+let print_env_e (e:env_entry) =
+	 print_string (fst(e));
+         print_string ";";
+	 let var_list = fst(snd(e)) in
+	 print_stringlist var_list;
+	 print_string ";";
+	 print_typ (snd(snd(e)))
+	;;
+let print_env (a:env) = 
+	List.iter print_env_e a
+	;;
+	
+(**************************************************************)	
 let var_counter = ref 0;;
  
 let spec (x:string) (env_a:env) : typ =
@@ -57,17 +79,20 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 		|Nil -> ([],List(Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))]))) (*When Val matches with Nil, a new type is generated and the type of Nil is List(the new type variable)*)
 		in val_typ
         |Var(s) -> if (List.mem_assoc s env_a) then 
-          ( print_string "var: ";
+          ( 
+	  (*print_string "var: ";
           print_expr e;
           print_string " ";
           print_typ (spec s env_a);
-          print_string "\n";
-          ([],spec s env_a) ) else raise (TypeError "algw fail.")  (*  T is I,i.e., [] and tao is the result from function spec  if env_a has a key x; otherwise raise error   *) 
+          print_string "\n";  *)
+          ([],spec s env_a)
+	  ) else raise (TypeError "algw fail.")  (*  T is I,i.e., [] and tao is the result from function spec  if env_a has a key x; otherwise raise error   *) 
 	
         |Apply(e1,e2) -> let (r, rou) = algw env_a e1 in
 			 let (s, deta) = algw (applyToTypeEnv r env_a) e2 in
                          let beta = Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))]) in
-                         let u = print_string "begin\n";
+                         let u = 
+			 (*print_string "begin\n"; *)
                          unify [] (applyToTypeExp s ([], rou)) (Fun(deta, beta)) in
                          let tao = applyToTypeExp u ([], beta) in
                          print_expr e;
@@ -79,10 +104,11 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
                          print_typ beta;
                          print_string "\ntao: ";
                          print_typ tao;
-                         print_string "\n***end\n";
+                         print_string "\n***end\n"; 
 			 ((compose (compose u s) r), tao)
         |If(p,e1,e2) -> let (r, rou) = algw env_a p in
 			let u1 = unify [] rou Bool in
+				
 			let u1r = compose u1 r in
 			let (s1, deta1) = algw (applyToTypeEnv u1r env_a) e1 in
 			let s1u1r = compose (compose s1 u1) r in
@@ -92,6 +118,7 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 			let tao = applyToTypeExp u2 ([], deta2) in
                          print_string "if ";
                          print_expr p;
+			 
                          print_string " then ";
                          print_expr e1;
                          print_string " else "; 
@@ -99,8 +126,15 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
                          print_string "endif\n"; 
                          print_string "\nbegin***\nrou: ";
                          print_typ rou;
+			 print_string "\n u1\n";
+                         print_subs u1;
+			 print_string "\nu1r\n";
+			 print_subs u1r;
+			 
                          print_string "\ndeta1: ";
                          print_typ deta1;
+			 print_string "\ns1deta1";
+			 print_typ (applyToTypeExp s2 ([],deta1));
                          print_string "\ndeta2: ";
                          print_typ deta2;
                          print_string "\n tao: ";
@@ -112,7 +146,9 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 			 let (r, rou) = algw ax_beta f in
 			 let t = r in
 	    		 let tao = applyToTypeExp r ([],Fun(beta, rou)) in
-                         print_string "Lambda: ";
+                         print_string "\nLambda: ";
+			 print_string "\nx's type:\n";
+			 print_typ beta;
                          print_string x;
                          print_string ". ";
                          print_expr f;
@@ -128,7 +164,32 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 			let (s, deta) = algw (applyToTypeEnv r (add_entry (x,rou_pie) env_a)) g in
 			let t = compose s r in
 			let tao = deta in
+			print_string "\n Let:\n";
+			print_string x;
+			print_string "\nf:\n";
+			print_expr f;
+			print_string "\ng:\n";
+			print_expr g;
+			print_string "\n rou:\n";
+			print_typ rou;
+			print_string "\n deta:\n";
+			print_typ deta;
+			print_string "\n tao:\n";
+			print_typ tao;
 			(t, tao)
+	|Letrec((x, e1), e2) -> let beta = Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))]) in
+			      let ax_beta = add_entry (x,([],beta)) env_a in (*add_entry is defined in TypeEnv.ml*) 
+			      let (r, rou) = algw ax_beta e1 in
+			      let u = unify [] (applyToTypeExp r ([],beta)) rou in
+			      let fix_t = compose u r in
+			      let fix_tao = applyToTypeExp fix_t ([],beta) in
+			      let rou1 = gen x fix_tao  env_a in (*ax_rou1 is type of gentyp, please look at function gen 's def*)
+			      let ax_rou1 = add_entry (x,rou1) env_a in (*ax_rou1 is type of env*)
+			      let rax_rou1 = applyToTypeEnv fix_t ax_rou1 in (*rax_rou1 is type of subs*)
+			      let (s, deta) = algw rax_rou1 e2 in
+			      let t = compose s fix_t in (*conceptually, fix_t = R, which is in let rule of the on line notes*)
+			      let tao = deta in
+			      (t, tao)
 	;;
 
 let typ_inference e = let (t, tao ) = algw init_typenv e in tao;;
