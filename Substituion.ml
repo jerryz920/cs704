@@ -33,7 +33,7 @@ let rec applyToTypeExp (s:subs) (gentyp_exp:gentyp) : typ =
       |Fun(tl,tr) -> Fun((applyToTypeExp s (var_e, tl)),(applyToTypeExp s (var_e, tr)))
 ;;
 
-let rec applyToTypeEnv (s:subs) (env_list:env) : env = 
+let applyToTypeEnv (s:subs) (env_list:env) : env = 
   List.map (fun (id, (x, v)) -> (id,(x,applyToTypeExp s (x,v)))) env_list
 ;;
 
