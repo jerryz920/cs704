@@ -23,14 +23,6 @@ let occurs (x : string) (t : typ) : bool =
   List.mem x (freevars ([], t))
 ;;
 
-let difference l1 l2 =
-  List.find_all (fun x -> not (List.mem x l2)) l1
-;;
-
-let vars_in_env (env_a:env): string list = 
-  List.fold_left (fun res (_,obj) -> (freevars obj) @ res) [] env_a
-;;
-
 let rec applyToTypeExp (s:subs) (gentyp_exp:gentyp) : typ =
   let frees = freevars gentyp_exp 
   and (var_e, typ_e) = gentyp_exp in
@@ -57,9 +49,10 @@ let specialize (x:string) (env_a:env) : typ =
 ;;
 
 let generalize (x:string) (p:typ) (env_a:env) : gentyp =
-        let p_free = freevars ([], p)
-        and nonfree_vars = vars_in_env env_a in
-        (difference p_free nonfree_vars, p);;
+  let difference l1 l2 = List.find_all (fun x -> not (List.mem x l2)) l1
+  and vars_in_env env_a = 
+    List.fold_left (fun res (_,obj) -> (freevars obj) @ res) [] env_a
+  in (difference (freevars ([], p)) (vars_in_env env_a), p);;
 
 (* Unify *)
 let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs = 
