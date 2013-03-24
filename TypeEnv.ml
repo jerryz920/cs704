@@ -29,13 +29,5 @@ let find_value_of_id (key:string) (typenv:env) : gentyp=
 let print_stringlist l =
         List.iter print_string l
         ;;
-(*let print_entry (e:env_entry ) =
-        print_string (fst(e));
-        print_string ";";
-        print_stringlist (fst(snd(e)));
-        print_typ (snd(snd(e)));
-	;;
-let print_env (e:env) = 
-	List.iter print_entry e;
-	;;
-*)
+
+
