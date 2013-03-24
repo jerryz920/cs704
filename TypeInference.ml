@@ -31,7 +31,8 @@ let print_env (a:env) =
 	
 (**************************************************************)	
 let var_counter = ref 0;;
- 
+
+
 let spec (x:string) (env_a:env) : typ =
 	let x_gentyp = List.assoc x env_a in (*x_gentyp is the corresponding gentyp of x in env_a, i.e., environment A; I copied the def of env here: type env_entry = string * gentyp; type env = env_entry list*)
 	let forall_vars = fst(x_gentyp) in (*a list of free_vars; the first part of gentyp, i.e., for example ["t1","t2"]*)
@@ -45,6 +46,7 @@ let spec (x:string) (env_a:env) : typ =
 	in(*get the subsitution of the vars in forall*)	
 	applyToTypeExp forall_vars_subs ([],x_typ)
 	;;	
+
 (*testcase: spec "isnil" init_typenv;;  *)	
 let rec intersect l1 l2 =
     match l1 with [] -> []
@@ -59,12 +61,25 @@ let rec intersect l1 l2 =
               )
         );;
 
+let rec difference l1 l2 =
+  match l1 with [] -> []
+   | x1::tl1 -> let tail = difference tl1 l2 in
+   if List.exists (fun x -> x1 == x) l2 then tail else x1::tail;;
+
+let rec vars_in_env (env_a:env) = 
+  match env_a with [] -> []
+  | (_, gt)::tl -> (freevars gt) @ (vars_in_env tl);;
+
 let gen (x:string) (p:typ) (env_a:env) : gentyp =
-	let p_free = freevars ([],p) in
+(*	let p_free = freevars ([],p) in
 	let nonfrees_env_a = if (List.mem_assoc x env_a)  then (fst (List.assoc x env_a)) else p_free in
 	let common = intersect p_free nonfrees_env_a in
 	(common, p)
-	;;
+	;;*)
+        let p_free = freevars ([], p) in
+        let nonfree_vars = vars_in_env env_a in
+        (difference p_free nonfree_vars, p)
+
 (*testcase: let a = add_entry ("f", (["t1"], Fun(Tvar("t1"),Int))) init_typenv;;
 gen "f" (Fun(Tvar("t1"),Fun((Tvar("t2"),Tvar("t3"))))) a;;*)  
 let rec algw (env_a:env) (e:expr) : (subs * typ) = 
@@ -162,6 +177,12 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 	
 	|Let((x,f),g) -> let (r, rou) = algw env_a f in
 			let rou_pie = gen x rou (applyToTypeEnv r env_a) in
+                        (*print_string "debug_env\n";
+                        print_env env_a;
+                        print_string "\ndebug_sub\n";
+                        print_subs r;
+                        print_string "\nrou\n";
+                        print_gentyp rou_pie;*)
 			let (s, deta) = algw (applyToTypeEnv r (add_entry (x,rou_pie) env_a)) g in
 			let t = compose s r in
 			let tao = deta in
