@@ -3,7 +3,8 @@ open LambdaUtils;;
 open Format;;
 open Substituion;;
 open TypeEnv
-exception TypeError of string (*I put it in Substituion.ml *)
+
+exception TypeError = TypeEnv.TypeError;;
 
 (*let typ_inference e = raise (TypeError "Implement me.")*)
 type subs_entry = string * typ;;
@@ -86,7 +87,7 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
           print_typ (spec s env_a);
           print_string "\n";  *)
           ([],spec s env_a)
-	  ) else raise (TypeError "algw fail.")  (*  T is I,i.e., [] and tao is the result from function spec  if env_a has a key x; otherwise raise error   *) 
+	  ) else raise (TypeError "Type checking failed ")  (*  T is I,i.e., [] and tao is the result from function spec  if env_a has a key x; otherwise raise error   *) 
 	
         |Apply(e1,e2) -> let (r, rou) = algw env_a e1 in
 			 let (s, deta) = algw (applyToTypeEnv r env_a) e2 in

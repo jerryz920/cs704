@@ -1,5 +1,6 @@
 open Lambda ;;
 
+exception TypeError of string;;
 type env_entry = string * gentyp  (*env_entry is a pair of string (identifier) and gentyp*)
 type env = env_entry list  (*the environment A is represented by a list whose content is env_entry*)
 

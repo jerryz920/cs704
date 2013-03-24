@@ -4,7 +4,6 @@ open LambdaUtils;;
 open Format;;
 
 type subs = (string * typ) list (*subs is a list of pair (type-variable,unquantified-type-expressions), that is, a list of (string,'typ')*)
-exception TypeError of string (*I put TypeError here *)
 
 let rec freevars (t:gentyp) : string list = 
 	let non_frees = fst(t) in
@@ -131,7 +130,7 @@ let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs =
 				       let expr2_dot_t = get_Tvar_t(expr2_dot) in
 				       let bool_expr2_dot_t = fst(expr2_dot_t) and string_expr2_dot_t = snd(expr2_dot_t) in
 				           (if (bool_expr2_dot_t && string_expr2_dot_t = string_t1) then s (*if (exp2' is TYPEVAR(t)) return S *)
-				           else if (occurs string_t1  expr2) then (raise (TypeError "unify fail2.")) (*else if (t occurs in exp2') return FAIL*)
+				           else if (occurs string_t1  expr2_dot) then (raise (TypeError "unify fail2.")) (*else if (t occurs in exp2') return FAIL*)
 				                else (compose [(string_t1, expr2_dot)] s) (*else return t:exp2' o S ; please note that function compose requires two parameters with type of subs*)
 					   )
 				      )
