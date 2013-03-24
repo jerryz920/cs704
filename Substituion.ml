@@ -108,13 +108,14 @@ root (List(Tvar("t1")));;
 root Int;; root Bool
 root Int = root Bool;;*)
 let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs = 
-	print_string "\nunify: \n";
+	(*print_string "\nunify: \n";
         print_string "\n typ1 \n"; 
 	print_typ expr1; 
 	print_string "\n typ2\n";
 	print_typ expr2;
 	print_string "\n root of expr1 "; print_string (root expr1);print_string "\n";
-	print_string "\n root of expr2 "; print_string (root expr2);print_string "\n"; 
+	print_string "\n root of expr2 "; print_string (root expr2);print_string
+        "\n"; *)
 	let tuple_t1 = get_Tvar_t(expr1) in  (*t1 is a tuple (bool,string)*)
 	let tuple_t2 = get_Tvar_t(expr2) in 
 	let bool_t1 = fst(tuple_t1) and string_t1 = snd(tuple_t1) in (*string_t1 is equal to t of the on-line noew in concept*)

@@ -95,7 +95,7 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 			 (*print_string "begin\n"; *)
                          unify [] (applyToTypeExp s ([], rou)) (Fun(deta, beta)) in
                          let tao = applyToTypeExp u ([], beta) in
-                         print_expr e;
+                         (*print_expr e;
                          print_string "begin***\nrou: ";
                          print_typ rou;
                          print_string "\ndeta: ";
@@ -104,7 +104,7 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
                          print_typ beta;
                          print_string "\ntao: ";
                          print_typ tao;
-                         print_string "\n***end\n"; 
+                         print_string "\n***end\n";  *)
 			 ((compose (compose u s) r), tao)
         |If(p,e1,e2) -> let (r, rou) = algw env_a p in
 			let u1 = unify [] rou Bool in
@@ -116,7 +116,7 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 			let u2 = unify [] (applyToTypeExp s2 ([],deta1)) deta2 in
 			let t = compose (compose (compose (compose u2 s2) s1) u1 ) r in 
 			let tao = applyToTypeExp u2 ([], deta2) in
-                         print_string "if ";
+                         (*print_string "if ";
                          print_expr p;
 			 
                          print_string " then ";
@@ -139,14 +139,14 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
                          print_typ deta2;
                          print_string "\n tao: ";
                          print_typ tao;
-                         print_string "\n***end\n";
+                         print_string "\n***end\n"; *)
 			(t, tao)
 	|Lambda(x, f) -> let beta = Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))]) in
 			 let ax_beta = add_entry (x,([],beta)) env_a in (*add_entry is defined in TypeEnv.ml*)
 			 let (r, rou) = algw ax_beta f in
 			 let t = r in
 	    		 let tao = applyToTypeExp r ([],Fun(beta, rou)) in
-                         print_string "\nLambda: ";
+                         (*print_string "\nLambda: ";
 			 print_string "\nx's type:\n";
 			 print_typ beta;
                          print_string x;
@@ -156,7 +156,7 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
                          print_typ rou;
                          print_string "\ntao: ";
                          print_typ tao;
-                         print_string "\n***end\n";
+                         print_string "\n***end\n";*)
 			 (t, tao)
 	
 	|Let((x,f),g) -> let (r, rou) = algw env_a f in
@@ -164,7 +164,7 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 			let (s, deta) = algw (applyToTypeEnv r (add_entry (x,rou_pie) env_a)) g in
 			let t = compose s r in
 			let tao = deta in
-			print_string "\n Let:\n";
+			(*print_string "\n Let:\n";
 			print_string x;
 			print_string "\nf:\n";
 			print_expr f;
@@ -175,7 +175,7 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) =
 			print_string "\n deta:\n";
 			print_typ deta;
 			print_string "\n tao:\n";
-			print_typ tao;
+			print_typ tao;*)
 			(t, tao)
 	|Letrec((x, e1), e2) -> let beta = Tvar(String.concat "" ["t";string_of_int((incr var_counter ; !var_counter))]) in
 			      let ax_beta = add_entry (x,([],beta)) env_a in (*add_entry is defined in TypeEnv.ml*) 
