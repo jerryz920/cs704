@@ -42,11 +42,7 @@ let rec applyToTypeExp (s:subs) (gentyp_exp:gentyp) : typ =
 ;;
 
 let rec applyToTypeEnv (s:subs) (env_list:env) : env = 
-  match env_list with
-    | [] -> []
-    | (id,ty)::left -> let quantifiers = fst(ty)
-                       in let part = (id,(quantifiers, (applyToTypeExp s ty)))
-                          in part::(applyToTypeEnv s left)
+  List.map (fun (id, (x, v)) -> (id,(x,applyToTypeExp s (x,v)))) env_list
 ;;
 
 let compose (s1:subs) (s2:subs) : subs =
