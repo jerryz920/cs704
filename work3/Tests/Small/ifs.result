@@ -1,0 +1,2 @@
+(define (main a) (call blorb-0-1 a))
+(define (blorb-0-1 z) 1)

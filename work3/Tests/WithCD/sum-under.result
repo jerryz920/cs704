@@ -1,0 +1,7 @@
+(define (sumunder-3 n) (call sumbetween (- n n) 3 n))
+(define (sumunder-5 n) (call sumbetween (- n n) 5 n))
+(define (sumbetween start step end)
+  (if (< start end) (+ start (call sumbetween (+ start step) step end)) 0))
+(define (sumunder-15 n) (call sumbetween (- n n) 15 n))
+(define (main n)
+  (- (+ (call sumunder-3 n) (call sumunder-5 n)) (call sumunder-15 n)))

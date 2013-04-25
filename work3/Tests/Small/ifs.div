@@ -1,0 +1,2 @@
+(main a:D -> D)
+(blorb x:S y:S z:D -> D)

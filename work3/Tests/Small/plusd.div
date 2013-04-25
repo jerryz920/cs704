@@ -1,0 +1,2 @@
+(foo x:S y:D -> D)
+(main x:D -> D)

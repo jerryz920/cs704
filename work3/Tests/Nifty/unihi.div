@@ -1,0 +1,3 @@
+(main a:D -> D)
+(foldSum acc:D l:D -> D)
+(mulPairs list1:S list2:D -> D)

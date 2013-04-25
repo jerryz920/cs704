@@ -1,0 +1,3 @@
+(search target:D input:D -> D)
+(match target:D input:D -> D)
+(main list:D -> D)

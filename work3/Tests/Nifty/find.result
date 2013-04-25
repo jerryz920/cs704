@@ -1,0 +1,6 @@
+(define (find-[quote_ann]-[quote_[ann]] vList) (car vList))
+(define (find-[quote_ann]-[quote_[john_ann]] vList)
+  (call find-[quote_ann]-[quote_[ann]] (cdr vList)))
+(define (find-[quote_ann]-[quote_[susan_john_ann]] vList)
+  (call find-[quote_ann]-[quote_[john_ann]] (cdr vList)))
+(define (main vlist) (call find-[quote_ann]-[quote_[susan_john_ann]] vlist))

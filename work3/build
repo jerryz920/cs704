@@ -1,0 +1,2 @@
+#!/bin/bash
+ocamlbuild -lib str BindTimeAnalysis.d.byte Specialize.d.byte Equal.d.byte

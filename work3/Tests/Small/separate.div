@@ -1,0 +1,2 @@
+(main a:D b:D c:D -> D)
+(frob s1:S s2:S d1:D s3:S d2:D -> D)

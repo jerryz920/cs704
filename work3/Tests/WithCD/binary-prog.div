@@ -1,0 +1,4 @@
+(append a:D b:D -> D)
+(upTo k:D n:D -> D)
+(towerOfHanoi k:D -> D)
+(main n:D -> D)

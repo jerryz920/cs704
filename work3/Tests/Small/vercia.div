@@ -1,0 +1,4 @@
+(main n:D -> D)
+(frotz a:D b:S c:S -> D)
+(twice x:S -> S)
+(thrice x:D -> D)

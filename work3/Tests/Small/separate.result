@@ -1,0 +1,2 @@
+(define (main a b c) (call frob-1-2-3 b a))
+(define (frob-1-2-3 d1 d2) 4)

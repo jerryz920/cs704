@@ -1,0 +1,5 @@
+(f a:D -> D)
+(g x:D -> D)
+(bar x:D -> D)
+(main x:D -> D)
+(foo a:S -> S)

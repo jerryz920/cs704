@@ -1,0 +1,2 @@
+(and x:S y:S -> S)
+(main -> D)

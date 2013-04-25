@@ -1,0 +1,5 @@
+(define (sumunder-3 n) 3)
+(define (sumunder-5 n) 5)
+(define (sumunder-15 n) 15)
+(define (main n)
+  (- (+ (call sumunder-3 n) (call sumunder-5 n)) (call sumunder-15 n)))

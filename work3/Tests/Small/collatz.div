@@ -1,0 +1,2 @@
+(collatz n:S -> S)
+(main -> D)

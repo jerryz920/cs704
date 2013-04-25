@@ -1,0 +1,3 @@
+(zifmia x:S y:D -> D)
+(rezrov f:S g:D h:S -> D)
+(main a:D -> D)

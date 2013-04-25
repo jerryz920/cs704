@@ -1,0 +1,6 @@
+(define (and x y) (if x (if y true false) false))
+(define (main) 
+  (cons (call and false false) 
+        (cons (call and false true)
+              (cons (call and true false)
+                    (cons (call and true true) nil) ))))

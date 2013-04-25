@@ -1,0 +1,2 @@
+(define (foo-21 d) (+ d 21))
+(define (main n) (call foo-21 (- n 3)))

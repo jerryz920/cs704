@@ -1,0 +1,2 @@
+(define (foo-true y) 7)
+(define (main x) (call foo-true x))

@@ -1,0 +1,6 @@
+(define (main n) (call frotz-3-4 n))
+(define (frotz-3-4 a) (call frotz-2-6 (* 4 a)))
+(define (frotz-2-6 a) (call frotz-1-4 (* 6 a)))
+(define (frotz-1-4 a) (call frotz-0-2 (* 4 a)))
+(define (frotz-0-2 a) (call thrice a))
+(define (thrice x) (* 3 x))

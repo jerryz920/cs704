@@ -1,0 +1,2 @@
+(define (main a b) (call fnoob-1-2 a b))
+(define (fnoob-1-2 y z) 1)

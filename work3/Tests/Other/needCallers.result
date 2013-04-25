@@ -1,0 +1,4 @@
+(define (f a) a)
+(define (g x) 20)
+(define (bar x) (call g x))
+(define (main x) (+ (call f (call g 0)) (call bar x)))

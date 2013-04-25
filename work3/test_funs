@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# Default testing definitions for Program 3.
+
+bta_error="Scheme0 binding-time analysis error:"
+spec_error="Scheme0 specialization error:"
+test_t=300
+
+function say {
+    echo "*** $1 ***"
+}
+
+function details {
+    echo "  $1" $2
+}
+
+function test_contents {
+    subtest=$(basename $1)
+    bta_tests=0
+    bta_correct=0
+
+    for f in Tests/${subtest}/*.sch
+    do
+        let bta_tests++
+        root=${f%.sch}
+        chk=${root}.out.div
+
+        # Perform BTA.
+        ./timeout ${test_t} ./BindTimeAnalysis.d.byte $f > $chk
+
+        # Check result.
+        if [[ $? = 124 ]] # timeout
+        then details "$root: BTA timeout after $test_t seconds."
+        elif [[ -e $root.div ]]
+        then # $root.div exists, so $chk is correct iff it equals $root.div.
+            if ./Equal.d.byte -div $chk $root.div
+            then let bta_correct++
+            else details "$root: Incorrect BTA."
+            fi
+        else # $root.div does not exist, so $chk is correct iff it's an error.
+            if grep -q "$bta_error" $chk 
+            then let bta_correct++
+            else details "$root: Incorrect BTA. Expected an error." $root
+            fi
+        fi
+        rm $chk
+    done
+    
+    spec_tests=0
+    spec_correct=0
+    for f in Tests/${subtest}/*.div
+    do
+        let spec_tests++
+        root=${f%.div}
+	chk=${root}.out.spec
+        
+        # Perform specialization.
+        ./timeout ${test_t} ./Specialize.d.byte $root.sch $f > $chk
+        
+        if [[ $? = 124 ]]
+        then details "$root: Specialization timeout after $test_t seconds." $root
+        elif [[ -e $root.result ]]
+        then
+            if ./Equal.d.byte -sch $chk $root.result
+            then let spec_correct++
+            else details "$root: Incorrect specialization." $root
+            fi
+        else
+            if grep -q "$spec_error" $chk
+            then let spec_correct++
+            else details "$root: Incorrect specialization. Expected an error." $root
+            fi
+        fi
+        rm $chk
+    done
+    
+    say "$subtest: $bta_correct/$bta_tests correct binding-time analyses"
+    say "$subtest: $spec_correct/$spec_tests correct specializations"
+}
