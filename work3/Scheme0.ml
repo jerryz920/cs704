@@ -111,24 +111,77 @@ let compare (d1:div) (d2:div) : bool = (*if d1 and d2 are the same return true e
 	let all_bools = List.map equal_each names in
 	List.fold_left (&&) true all_bools
 	;;
-	
-let rec find_least (d:div) (fe:fn_expr) :div = (*find least dynamic div*)
+(*test case: 1.
+	     let d1 = [("main",[("a",D);("b",S)]); ("function1",[("c",S);("d",S)])];;
+	     let d2 = [("function1",[("c",S);("d",S)]); ("main",[("a",D);("b",S)])];;
+	     compare d1 d2;;
+	     2.
+	     let d1 = [("main",[("a",D);("b",S)]); ("function1",[("c",S);("d",S)])];;
+             let d2 = [("function1",[("c",S);("d",D)]); ("main",[("a",D);("b",S)])];;
+*)	
+
+(*find least dynamic div*)
+(*one import thing is that the order of the functions in div might be different for different divs; but given a certian function f, then in f's btenv, the formals order is always the same*)
+let rec find_least (d:div) (fe:fn_expr) :div = 
+	(*this function corresponds to bind_expr_fn e_i (div f_i) g where i is the ith function*)
 	let func_i_impacts (fb:fn_bte) (g:string) : btenv = 
-							    let name = fst(fb) in (*name of the function*)
-						            bind_expr_fn (List.assoc name fe) (List.assoc name d) g(*List.assoc name fe==expr; List.assoc name d==btenv*)
+	(*fb is the basic element of list d*) 
+		let name = fst(fb) in (*name of the function*)
+	   	bind_expr_fn (List.assoc name fe) (List.assoc name d) g(*List.assoc name fe==expr; List.assoc name d==btenv*)
 	in
-	let func_all_impacts (g:string) : btenv_list = List.map (fun x -> func_i_impacts x g) d (*x is type of fn_bte; d is a list of x(d is a list of fn_bte)*)
-	in let g_tao (g:string) :btenv = List.assoc g d in
-	let list_static (g:string) :btenv = List.map (fun x -> (fst(x),S)) (g_tao g) in
-	
-	let union_func_all_impacts (g:string) :btenv = List.fold_left (list_union)  (list_static g) (func_all_impacts g) in
-	let get_out_of_main = List.filter (fun x -> not(x="main")) d in (*get_out_of_main is type of div, but it does not include main's information*)
-	let get_out_of_main_names = List.map fst get_out_of_main in (*only function names, a string list*)
-	let newdiv_wo_main = List.map union_func_all_impacts get_out_of_main_names in
-	let main_info = [("main",(List.assoc "main" d))] in
-	let newdiv = List.append main_info newdiv_wo_main in
-	if compare newdiv d then d else (find_least newdiv fe)
+	(*this function try to gather the impacts of all functions on g, it returns a list of btenv*)
+		let func_all_impacts (g:string) : btenv_list = List.map (fun x -> func_i_impacts x g) d (*x is type of fn_bte; d is a list of x(d is a list of fn_bte)*)
+	in 
+		let g_tao (g:string) :btenv = List.assoc g d 
+	in
+		let list_static (g:string) :btenv = List.map (fun x -> (fst(x),S)) (g_tao g) 
+	in
+		(*this function try to union the impacts of the list returned by func_all_impacts on g*)
+		let union_func_all_impacts (g:string) :btenv = List.fold_left (list_union)  (list_static g) (func_all_impacts g) 
+	in
+		let get_out_of_main = List.filter (fun x -> not(fst(x)="main")) d 
+	in (*get_out_of_main is type of div, but it does not include main's information*)
+		let get_out_of_main_names = List.map fst get_out_of_main 
+	in (*only function names, a string list*)
+		(*update the functions (except for main) 's btenv)*)
+		let newdiv_wo_main = List.map (fun x -> (x,union_func_all_impacts x)) get_out_of_main_names 
+	in
+		let main_info = [("main",(List.assoc "main" d))] 
+	in
+		let newdiv = List.append main_info newdiv_wo_main 
+	in
+		if compare newdiv d then d else (find_least newdiv fe)
 	;;
+(*test case: 1.
+	     let d = [("main",[("a",D);("b",D)]); ("function1",[("c",S);("d",S)])];;
+	     let g = "function1";;
+	     let l = [Unop(Car, Var("b")); Binop(Plus, Var("b"), If(Val(Boolean(true)),Var("a"),Var("b")))];;   (*the first formal is S, the second is D*)
+	     let fe = [("main",Call(g,l)); ("function1", Unop(Car, Var("c")) )];;
+	     let result = find_least d fe;;
+	     bind_expr (List.assoc "function1" fe) (List.assoc "function1" result);;
+	     2.
+	     let d = [("main",[("a",D);("b",D)]); ("function1",[("c",S);("d",S)])];;
+             let g = "function1";;
+             let l = [Unop(Car, Var("b")); Binop(Plus, Var("b"), If(Val(Boolean(true)),Var("a"),Var("b")))];;   (*the first formal is S, the second is D*)
+             let fe = [("main",Call(g,l)); ("function1", Binop(Plus, Var("c"), If(Val(Boolean(true)),Var("c"),Var("d")))) ];;
+             let result = find_least d fe;;
+             bind_expr (List.assoc "function1" fe) (List.assoc "function1" result);;
+	     3.
+	     let d = [("main",[("a",D);("b",D)]); ("function1",[("c",S);("d",S)])];;
+             let fe = [("main",Unop(Car, Var("b")))]; ("function1", Binop(Plus, Var("c"), If(Val(Boolean(true)),Var("c"),Var("d")))) ];;
+             let result = find_least d fe;;
+             bind_expr (List.assoc "function1" fe) (List.assoc "function1" result);;
+	     4.
+	     let d = [("main",[("a",D);("b",D)]); ("function1",[("c",S);("d",S)])];;
+             let fe = [("main", Unop (Car, Var "b")); ("function1", Unop (Car, Var "c"))];;
+	     let result = find_least d fe;;
+             bind_expr (List.assoc "function1" fe) (List.assoc "function1" result);;
+	     5.
+	     let d = [("main",[("a",D);("b",D)])];;
+	     let fe = [("main", Unop (Car, Var "b"))];;
+	     let result = find_least d fe;;
+	     bind_expr (List.assoc "main" fe) (List.assoc "main" result);;
+*)
 	
 	
 (* Implement these. *)
