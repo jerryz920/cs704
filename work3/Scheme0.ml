@@ -181,10 +181,81 @@ let rec find_least (d:div) (fe:fn_expr) :div =
 	     let fe = [("main", Unop (Car, Var "b"))];;
 	     let result = find_least d fe;;
 	     bind_expr (List.assoc "main" fe) (List.assoc "main" result);;
+	     6.
+	     let d = [("main",[("a",D);("b",S)]); ("function1",[("c",S);("d",S)]); ("function2",[("e",S);("f",S)])];;
+             let g1 = "function1";;
+	     let g2 = "function2";;
+             let l1 = [Unop(Car, Var("b")); Binop(Plus, Var("b"), If(Val(Boolean(true)),Var("a"),Var("b")))];;   (*the first formal is S, the second is D*)
+	     let l2 = [Unop (Car, Var "c") ; Unop (Car, Var "d")];;
+             let fe = [("main",Call(g1,l1)); ("function1", Call(g2,l2)); ("function2", Unop (Car, Var "e")) ];;
+             let result = find_least d fe;;
+             bind_expr (List.assoc "function2" fe) (List.assoc "function2" result);;
 *)
 	
+let init_div (prog:program) : div =
+	let get_btenv ( str_def:(string*definition) ) : (string*btenv) =
+		let name = fst(str_def) 
+		in
+		let def = snd(str_def) (*str is the name of a function, def is the definition of that function*)
+		in
+		let formal_list = fst(def) 
+		in
+		let bt = if name="main" then List.map (fun x -> (x,D)) formal_list else List.map (fun x -> (x,S)) formal_list
+		in (name,bt)
+	in
+	List.map get_btenv prog
+	;;
 	
+(*test case: 1.
+	     let prog = [("main",(["a";"b"], Unop(Car, Var("b")))) ; ("f1",(["c";"d"], Unop(Car, Var("d")))) ; ("f2",(["e";"f"], Unop(Car, Var("e")))) ];;
+	     init_div prog;;
+	     2.
+	     let prog = [("main",(["a";"b"], Unop(Car, Var("b"))))];;
+	     init_div prog;;
+*)	
+		
 (* Implement these. *)
-let bind_time_analysis (prog:program) :division = []
-
+let bind_time_analysis (prog:program) :division = 
+	let div0 = init_div prog
+	in
+	let fe = List.map (fun x -> (fst(x), snd(snd(x))) ) prog  (*get a list of function_name (string) * expr*)
+	in
+	let final_div = find_least div0 fe 
+	in
+	let get_divison (d:div) (name_expr:fn_expr) : division =
+		let get_bind_time_env (str_btenv: (string*btenv)) : bind_time_env =
+			
+			let name = fst(str_btenv)  (*the name of a function, it is a string*)
+			in 
+			let bt = snd(str_btenv)    (*the btenv of a function, note the div is a list of (string*btenv) *)
+			in
+			let bindings = List.map snd bt   (*bindings is a list. it looks like (S,D,D....) *)
+			in
+			let has_dynamic = List.exists (fun x -> x=S) bindings   (*fixing this point--if any formal of a function is Dynamic, then the fucntion's type is also Dynamic*)
+			in 
+			let expr_type = bind_expr (List.assoc name name_expr) bt
+			in
+			if has_dynamic then (bt,D) else
+			(bt,expr_type)
+		in
+		List.map (fun x -> (fst(x), get_bind_time_env x)) d
+	in
+	get_divison final_div fe
+	;;
+(*test case: 1.
+	     let prog = [("main",(["a";"b"], Unop(Car, Var("b"))))];;
+	     bind_time_analysis prog;;
+	     2.
+	     let prog = [("main",(["a";"b"], Unop(Car, Var("b")))) ; ("f1",(["c";"d"], Unop(Car, Var("d")))) ; ("f2",(["e";"f"], Unop(Car, Var("e")))) ];;
+	     bind_time_analysis prog;;
+	     3.
+	     let prog = [("main",(["a";"b"], Call("f1", [Unop(Car, Var("b")); Val(Number(1))] ))) ; ("f1",(["c";"d"], Unop(Car, Var("d")))) ; ("f2",(["e";"f"], Unop(Car, Var("e")))) ];;
+	     bind_time_analysis prog;;
+	     4.
+	     let prog = [("main",(["a";"b"], Call("f1", [Unop(Car, Var("b")); Val(Number(1))] ))) ; ("f1",(["c";"d"], Unop(Car, Var("c")))) ; ("f2",(["e";"f"], Unop(Car, Var("e")))) ];;
+             bind_time_analysis prog;;
+	     5.
+	     let prog = [("main",(["a";"b"], Call("f1", [Unop(Car, Var("b")); Val(Number(1))] ))) ; ("f1",(["c";"d"], Call("f2", [Unop(Car, Var("d")); Unop(Car, Var("c"))] ))) ; ("f2",(["e";"f"], Unop(Car, Var("e")))) ];;
+             bind_time_analysis prog;;
+*)	
 let specialize (prog:program) (div:division): program = []
