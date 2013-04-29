@@ -231,7 +231,7 @@ let bind_time_analysis (prog:program) :division =
 			in
 			let bindings = List.map snd bt   (*bindings is a list. it looks like (S,D,D....) *)
 			in
-			let has_dynamic = List.exists (fun x -> x=S) bindings   (*fixing this point--if any formal of a function is Dynamic, then the fucntion's type is also Dynamic*)
+			let has_dynamic = List.exists (fun x -> x=D) bindings   (*fixing this point--if any formal of a function is Dynamic, then the fucntion's type is also Dynamic*)
 			in 
 			let expr_type = bind_expr (List.assoc name name_expr) bt
 			in
