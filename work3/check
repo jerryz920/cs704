@@ -2,7 +2,7 @@
 
 ./build
 . test_funs
-for subtest in Tests/Small Tests/Nifty 
+for subtest in Tests/Small Tests/Nifty Tests/Other Tests/WithCD Test/Diverging
 do
     test_contents $subtest
 done

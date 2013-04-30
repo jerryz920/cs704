@@ -8,27 +8,27 @@ exception TypeError = TypeEnv.TypeError;;
 
 (*                    Debug use                             *)
 let print_subs_e (e:subs_entry) =
-	print_string (fst(e));
-	print_string ";";
-	print_typ (snd(e));
-	print_string "\n";
-	;;
+        print_string (fst(e));
+        print_string ";";
+        print_typ (snd(e));
+        print_string "\n";
+        ;;
 let print_subs (s:subs) = 
-	List.iter print_subs_e s
-	;;
+        List.iter print_subs_e s
+        ;;
 let print_env_e (e:env_entry) =
-	 print_string (fst(e));
+         print_string (fst(e));
          print_string ";";
-	 let var_list = fst(snd(e)) in
-	 print_stringlist var_list;
-	 print_string ";";
-	 print_typ (snd(snd(e)))
-	;;
+         let var_list = fst(snd(e)) in
+         print_stringlist var_list;
+         print_string ";";
+         print_typ (snd(snd(e)))
+        ;;
 let print_env (a:env) = 
-	List.iter print_env_e a
-	;;
-	
-(**************************************************************)	
+        List.iter print_env_e a
+        ;;
+        
+(**************************************************************)        
 
 let rec algw (env_a:env) (e:expr) : (subs * typ) = (
   match e with
@@ -93,6 +93,7 @@ let rec algw (env_a:env) (e:expr) : (subs * typ) = (
     let rou1 = generalize x (applyToTypeExp fix_t ([],beta)) env_a in (*ax_rou1 is type of gentyp, please look at function gen 's def*)
     let (s, deta) = algw (applyToTypeEnv fix_t (add_entry (x,rou1) env_a)) e2 in
     (compose s fix_t, deta)
-  );;
+  )
+;;
 
-let typ_inference e = let (t, tao ) = algw init_typenv e in tao;;
+let typ_inference e = let (t, tao) = algw init_typenv e in tao;;

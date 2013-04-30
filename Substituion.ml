@@ -23,12 +23,14 @@ let occurs (x : string) (t : typ) : bool =
   List.mem x (freevars ([], t))
 ;;
 
-let rec applyToTypeExp (s:subs) (gentyp_exp:gentyp) : typ =
-  let frees = freevars gentyp_exp 
-  and (var_e, typ_e) = gentyp_exp in
+let rec applyToTypeExp (s:subs) (exp:gentyp) : typ =
+  let (var_e, typ_e) = exp in
     match typ_e with
-      |Int |Bool |Sym -> typ_e
-      |Tvar(tl) ->if (List.mem tl frees && List.mem_assoc tl s) then List.assoc tl s else typ_e
+      Int |Bool |Sym -> typ_e
+      |Tvar(tl) ->(if (List.mem tl (freesvars exp) && List.mem_assoc tl s)
+                   then List.assoc tl s 
+                   else typ_e
+                  )
       |List(tl) -> List(applyToTypeExp s (var_e, tl))
       |Fun(tl,tr) -> Fun((applyToTypeExp s (var_e, tl)),(applyToTypeExp s (var_e, tr)))
 ;;
@@ -81,4 +83,4 @@ let rec unify (s:subs) (expr1:typ) (expr2:typ) : subs =
 so ---unify [] (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))) (Fun(Int,Tvar("t1")));; the result is corrent: Exception: TypeError "unify fail."     *)
 (*testcase5: expr1 is (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))); expr2 is (Fun(Tvar("t2"),Tvar("t1"))); s is [], so ---unify [] (Fun(Tvar("t1"),Fun(Tvar("t2"),Bool))) (Fun(Tvar("t2"),Tvar("t1")));; the result is corrent  *)
 (*testcase6; expr1 is (List(Tvar("t1"))) ; expr2 is (List(Int)); s =[], so ----unify [] (List(Tvar("t1"))) (List(Int));;   result correct *)
-(*testcase7: expr1 is (List(Fun(Int, Bool))); expr2 is (List(Fun(Tvar("t1"),Bool))); s = [], so ---unify [] (List(Fun(Int, Bool))) (List(Fun(Tvar("t1"),Bool)))  ;; result correct *)	
+(*testcase7: expr1 is (List(Fun(Int, Bool))); expr2 is (List(Fun(Tvar("t1"),Bool))); s = [], so ---unify [] (List(Fun(Int, Bool))) (List(Fun(Tvar("t1"),Bool)))  ;; result correct *)   
