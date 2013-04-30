@@ -1,4 +1,5 @@
-include Scheme0Utils
+include Scheme0Utils;;
+open Format;;
 (*implement union *)
 let union (b1:bind_time) (b2:bind_time):bind_time =
 	if b1 == S && b2 == S then S else D
@@ -47,30 +48,41 @@ let rec bind_expr (e:expr) (tao:btenv):bind_time =
              bind_expr e tao;;
 *)
 let list_union (bt1:btenv) (bt2:btenv):btenv =
+	(*print_string "hello\n";*)
 	List.map2 (fun x y -> (fst(x),union (snd(x)) (snd(y)) ) ) bt1 bt2
 	;;
 (*let bt1 = [("a",S);("b",D)];;
   let bt2 = [("a",D);("b",S)];;
   list_union bt1 bt2;;
 *)
-let rec bind_expr_fn (e:expr) (tao:btenv) (g:string) : btenv = (*tao is function g's tao*)
+let rec bind_expr_fn (e:expr) (tao:btenv) (g:string) (gtao:btenv): btenv = (*tao is function f_i's tao and e is function f_i's expression*)
+	(*the return is function g's update tao, tao is type of btenv*)
 	match e with
-	|Val(v) -> List.map (fun x -> (fst(x),S)) tao 
-	|Var(v) -> List.map (fun x -> (fst(x),S)) tao
-	|If(e1,e2,e3) -> let r1 = bind_expr_fn e1 tao g in
-			 let r2 = bind_expr_fn e2 tao g in
-			 let r3 = bind_expr_fn e3 tao g in
-			 list_union r1 (list_union r2 r3)
-	|Call(f,l) ->  let l1 = List.map (fun x -> bind_expr_fn x tao g) l in (*bind_expr_fn e_i tao g, where e_i is the ith element of list l (recall that l is a list of expr).Note that l1 is a list of btenv*)
-		       let list_static = List.map (fun x -> (fst(x),S)) tao in
+	|Val(v) -> List.map (fun x -> (fst(x),S)) gtao 
+	|Var(v) -> List.map (fun x -> (fst(x),S)) gtao
+	|If(e1,e2,e3) -> let r1 = bind_expr_fn e1 tao g gtao in
+			 let r2 = bind_expr_fn e2 tao g gtao in
+			 let r3 = bind_expr_fn e3 tao g gtao in
+			 
+			 list_union r1 (list_union r2 r3) 
+	(**|Call(f,l) -> List.map (fun x -> (fst(x),D)) gtao *)
+	
+	|Call(f,l) ->  let l1 = List.map (fun x -> bind_expr_fn x tao g gtao) l in (*bind_expr_fn e_i tao g, where e_i is the ith element of list l (recall that l is a list of expr).Note that l1 is a list of btenv*)
+		       (*the btenv in l1 should be the same type as gtao*)
+		       
+		       let list_static = List.map (fun x -> (fst(x),S)) gtao in
 		       let t = List.fold_left (list_union) list_static l1 in (*the element of l1 is also a list:btenv*)
-		       if not(f=g) then t (*short circurt*)
+		       if not(f=g) then t (*short circurt*) 
+	
 		       else 
-		       ( let list_after_call_bind_expr = List.map2 (fun x y -> (fst(x), bind_expr y tao)) tao l in (*the order of tao and l should be same*)
+		       ( let list_after_call_bind_expr = List.map2 (fun x y -> (fst(x), bind_expr y tao)) gtao l in (*the order of tao and l should be same*)
 			 list_union t list_after_call_bind_expr
 		       )
-	|Binop(bin, e1, e2) -> list_union (bind_expr_fn e1 tao g) (bind_expr_fn e2 tao g)
-	|Unop(un, e1) -> (bind_expr_fn e1 tao g)
+	
+	|Binop(bin, e1, e2) -> list_union (bind_expr_fn e1 tao g gtao) (bind_expr_fn e2 tao g gtao)
+	
+	|Unop(un, e1) -> (bind_expr_fn e1 tao g gtao)
+	
 	;;
 
 (*test case: 1.
@@ -95,6 +107,13 @@ let rec bind_expr_fn (e:expr) (tao:btenv) (g:string) : btenv = (*tao is function
              let tao = ([("a",S);("b",D)]);;
              let f ="f";;
              let l = [Unop(Car, Var("b")); Binop(Plus, Var("b"), If(Val(Boolean(true)),Var("a"),Var("b")))];;
+             let e = Call(f,l);;
+             bind_expr_fn e tao g;;
+	     5.
+	     let g = "g";;
+             let tao = ([("a",S);("b",D)]);;
+             let f ="f";;
+             let l = [Unop(Car, Var("b"))];;
              let e = Call(f,l);;
              bind_expr_fn e tao g;;
 
@@ -126,8 +145,9 @@ let rec find_least (d:div) (fe:fn_expr) :div =
 	(*this function corresponds to bind_expr_fn e_i (div f_i) g where i is the ith function*)
 	let func_i_impacts (fb:fn_bte) (g:string) : btenv = 
 	(*fb is the basic element of list d*) 
-		let name = fst(fb) in (*name of the function*)
-	   	bind_expr_fn (List.assoc name fe) (List.assoc name d) g(*List.assoc name fe==expr; List.assoc name d==btenv*)
+		let name = fst(fb) in (*name of the function, i.e., f_i*)
+		let gtao = List.assoc g d in  (*this is function g 's tao, NOT f_i 's tao*)
+	   	bind_expr_fn (List.assoc name fe) (List.assoc name d) g gtao(*List.assoc name fe==expr; List.assoc name d==btenv*)
 	in
 	(*this function try to gather the impacts of all functions on g, it returns a list of btenv*)
 		let func_all_impacts (g:string) : btenv_list = List.map (fun x -> func_i_impacts x g) d (*x is type of fn_bte; d is a list of x(d is a list of fn_bte)*)
