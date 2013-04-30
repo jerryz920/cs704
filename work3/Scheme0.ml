@@ -240,15 +240,23 @@ let bind_time_analysis (prog:program) :division =
 	in
 	let fe = List.map (fun x -> (fst(x), snd(snd(x))) ) prog  (*get a list of function_name (string) * expr*)
 	in
-	let final_div = find_least div0 fe 
+	let main_formals = List.map fst (List.assoc "main" div0)
+	in
+	let ismain0_value = List.length main_formals=0 
+	in
+	(**let final_div = if ((List.length main_formals=0)) then div0 else (find_least div0 fe)  *)
+	let final_div = find_least div0 fe
 	in
 	let get_divison (d:div) (name_expr:fn_expr) : division =
-		let get_bind_time_env (str_btenv: (string*btenv)) : bind_time_env =
+		let get_bind_time_env (str_btenv: (string*btenv)) (ismain0:bool) : bind_time_env =
 			
 			let name = fst(str_btenv)  (*the name of a function, it is a string*)
 			in 
 			let bt = snd(str_btenv)    (*the btenv of a function, note the div is a list of (string*btenv) *)
 			in
+			if ismain0 then (if name="main" then (bt,D) else (bt,S))
+			else 
+			(
 			let bindings = List.map snd bt   (*bindings is a list. it looks like (S,D,D....) *)
 			in
 			let has_dynamic = List.exists (fun x -> x=D) bindings   (*fixing this point--if any formal of a function is Dynamic, then the fucntion's type is also Dynamic*)
@@ -257,8 +265,9 @@ let bind_time_analysis (prog:program) :division =
 			in
 			if has_dynamic then (bt,D) else
 			(bt,expr_type)
+			)
 		in
-		List.map (fun x -> (fst(x), get_bind_time_env x)) d
+		List.map (fun x -> (fst(x), get_bind_time_env x ismain0_value)) d
 	in
 	get_divison final_div fe
 	;;
