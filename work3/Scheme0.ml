@@ -39,18 +39,24 @@ let list_union (bt1:btenv) (bt2:btenv):btenv =
 	(*print_string "hello\n";*)
 	List.map2 (fun x y -> (fst(x),union (snd(x)) (snd(y)) ) ) bt1 bt2
 	;;
-let rec bind_expr_fn (e:expr) (tao:btenv) (g:string) (gtao:btenv) (d:div): btenv = (*tao is function f_i's tao and e is function f_i's expression*)
+let rec bind_expr_fn (e:expr) (tao:btenv) (g:string) (gtao:btenv) (d:div) (if_dynamic:bool): btenv = (*tao is function f_i's tao and e is function f_i's expression*)
 	(*the return is function g's update tao, tao is type of btenv*)
 	match e with
 	|Val(v) -> List.map (fun x -> (fst(x),S)) gtao 
 	|Var(v) -> List.map (fun x -> (fst(x),S)) gtao
-	|If(e1,e2,e3) -> let r1 = bind_expr_fn e1 tao g gtao d in
-			 let r2 = bind_expr_fn e2 tao g gtao d in
-			 let r3 = bind_expr_fn e3 tao g gtao d in
+	|If(e1,e2,e3) -> (*consider dynamic if*)
+		         let condition_type = bind_expr e1 tao d in
+	                 let is_dynamic_if = condition_type = D in
+			 let r1 = bind_expr_fn e1 tao g gtao d is_dynamic_if in
+			 let r2 = bind_expr_fn e2 tao g gtao d is_dynamic_if in
+			 let r3 = bind_expr_fn e3 tao g gtao d is_dynamic_if in
 			 
 			 list_union r1 (list_union r2 r3) 
 	
-	|Call(f,l) ->  let l1 = List.map (fun x -> bind_expr_fn x tao g gtao d) l in (*bind_expr_fn e_i tao g, where e_i is the ith element of list l (recall that l is a list of expr).Note that l1 is a list of btenv*)
+	|Call(f,l) ->  if (if_dynamic) then (List.map (fun x -> (fst(x),D)) gtao)
+		       else
+		       ((*the call is not in dynamic if*)
+		       let l1 = List.map (fun x -> bind_expr_fn x tao g gtao d if_dynamic) l in (*bind_expr_fn e_i tao g, where e_i is the ith element of list l (recall that l is a list of expr).Note that l1 is a list of btenv*)
 		       (*the btenv in l1 should be the same type as gtao*)
 		       
 		       let list_static = List.map (fun x -> (fst(x),S)) gtao in
@@ -61,10 +67,11 @@ let rec bind_expr_fn (e:expr) (tao:btenv) (g:string) (gtao:btenv) (d:div): btenv
 		       ( let list_after_call_bind_expr = List.map2 (fun x y -> (fst(x), bind_expr y tao d)) gtao l in (*the order of tao and l should be same*)
 			 list_union t list_after_call_bind_expr
 		       )
+		       ) (*the call is not in dynamic if*)
 	
-	|Binop(bin, e1, e2) -> list_union (bind_expr_fn e1 tao g gtao d) (bind_expr_fn e2 tao g gtao d)
+	|Binop(bin, e1, e2) -> list_union (bind_expr_fn e1 tao g gtao d if_dynamic) (bind_expr_fn e2 tao g gtao d if_dynamic)
 	
-	|Unop(un, e1) -> (bind_expr_fn e1 tao g gtao d)
+	|Unop(un, e1) -> (bind_expr_fn e1 tao g gtao d  if_dynamic)
 	
 	;;
 (*
@@ -91,7 +98,7 @@ let rec find_least (d:div) (fe:fn_expr) :div =
 	(*fb is the basic element of list d*) 
 		let name = fst(fb) in (*name of the function, i.e., f_i*)
 		let gtao = List.assoc g d in  (*this is function g 's tao, NOT f_i 's tao*)
-	   	bind_expr_fn (List.assoc name fe) (List.assoc name d) g gtao d(*List.assoc name fe==expr; List.assoc name d==btenv*)
+	   	bind_expr_fn (List.assoc name fe) (List.assoc name d) g gtao d false(*List.assoc name fe==expr; List.assoc name d==btenv*)
 	in
 	(*this function try to gather the impacts of all functions on g, it returns a list of btenv*)
 		let func_all_impacts (g:string) : btenv_list = List.map (fun x -> func_i_impacts x g) d (*x is type of fn_bte; d is a list of x(d is a list of fn_bte)*)
