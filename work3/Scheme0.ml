@@ -46,14 +46,17 @@ let rec bind_expr_fn (e:expr) (tao:btenv) (g:string) (gtao:btenv) (d:div) (if_dy
 	|Var(v) -> List.map (fun x -> (fst(x),S)) gtao
 	|If(e1,e2,e3) -> (*consider dynamic if*)
 		         let condition_type = bind_expr e1 tao d in
-	                 let is_dynamic_if = condition_type = D in
-			 let r1 = bind_expr_fn e1 tao g gtao d is_dynamic_if in
-			 let r2 = bind_expr_fn e2 tao g gtao d is_dynamic_if in
-			 let r3 = bind_expr_fn e3 tao g gtao d is_dynamic_if in
+	                 let is_dynamic= condition_type = D in
+			 let r1 = bind_expr_fn e1 tao g gtao d is_dynamic in
+			 let r2 = bind_expr_fn e2 tao g gtao d is_dynamic in
+			 let r3 = bind_expr_fn e3 tao g gtao d is_dynamic in
 			 
 			 list_union r1 (list_union r2 r3) 
 	
-	|Call(f,l) ->  if (if_dynamic) then (List.map (fun x -> (fst(x),D)) gtao)
+	|Call(f,l) ->  if (if_dynamic) then (
+				if f=g then (List.map (fun x -> (fst(x),D)) gtao)
+				else (List.map (fun x -> (fst(x),S)) gtao)
+				) (*only f=g (they are the same function, i.e., dynamic if inlcude the g)*)
 		       else
 		       ((*the call is not in dynamic if*)
 		       let l1 = List.map (fun x -> bind_expr_fn x tao g gtao d if_dynamic) l in (*bind_expr_fn e_i tao g, where e_i is the ith element of list l (recall that l is a list of expr).Note that l1 is a list of btenv*)
@@ -75,12 +78,41 @@ let rec bind_expr_fn (e:expr) (tao:btenv) (g:string) (gtao:btenv) (d:div) (if_dy
 	
 	;;
 (*
+	1.
 	let e = Call("f",[Call("g",[Val(Number(0))])]);;
 	let tao = [("a",S)];;
 	let g= "f";;
 	let gtao = [("a",S)];;
 	let d = [("g",[("x",D)]) ];;
 	bind_expr_fn e tao "f" gtao d;;
+	2.
+	let e1 = Binop(Plus, Call("sumunder",[Var("n");Val(Number(3))]),  Call("sumunder",[Var("n");Val(Number(25))]));;
+	let e2 = Call("sumunder",[Var("n");Val(Number(15))]);;
+	let e = Binop(Minus, e1, e2);;
+	let tao = [("n",D)];;
+	let g = "sumunder";;
+	let gtao = [("n",S) ; ("k",S)];;
+	let d = [("main",[("n",D)]) ];;
+	bind_expr_fn e tao "sumunder" gtao d;;
+	////////////////////////////
+	let e1 = Binop(Minus, Var("n"), Var("n"));;
+	let e2 = Var("k");;
+	let e3 = Var("n");;
+	let e = Call("sumbetween", [e1; e2; e3]);;
+	let tao = [("n",D); ("k",S)];;
+	let gtao = [("start",S) ; ("step",S); ("end",S)];;
+	let d = [("sumunder", [("n",D); ("k",S)]); ("sumbetween", [("start",S) ; ("step",S); ("end",S)]) ];;
+	bind_expr_fn e tao "sumbetween" gtao d;;
+	/////////////////////////
+	let e1 = Binop(LessThan, Var("start"), Var("end"));;
+	let e2 = Var("start");;
+	let e3 = Call("sumbetween", [Var("start"); Var("end"); Var("step")]);;
+	let e = If(e1,e2,e3);;
+	let tao = [("start",D) ; ("step",D); ("end",D)];;
+	let gtao = [("n",D); ("k",S)];;
+	let d = [("sumunder", [("n",D); ("k",S)]); ("sumbetween", [("start",D) ; ("step",D); ("end",D)]) ];;
+	bind_expr_fn e tao "sumunder" gtao d false;; 
+	
 *)
 let compare (d1:div) (d2:div) : bool = (*if d1 and d2 are the same return true else flase*)
 	let names = List.map fst d1 in
