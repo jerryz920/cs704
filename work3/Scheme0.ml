@@ -334,7 +334,7 @@ let rec reduce e (env_list: env) prog div =
           (
             let (s_env, d_env) = part_env argvals argnames fdiv
             and prepared_senv = List.map (fun (k,v) -> (k, Some v)) s_env
-            and prepared_denv = List.map (fun (k,v) -> (k, D)) d_env
+            and prepared_denv = List.map (fun (k,v) -> (k, None)) d_env
             in match (snd fdiv) with
               | S -> reduce fbody (prepared_senv @ prepared_denv) prog div
               | D -> 
