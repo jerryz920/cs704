@@ -190,3 +190,86 @@ let bind_time_analysis (prog:program) :division =
 	get_divison final_div fe
 	;;
 let specialize (prog:program) (div:division): program = []
+
+(* the pending functions *)
+let rec specialize_func (pending: (string * string * expr list * expr) list)  prog div =
+  let (fname, arglist, body) = hd pending
+  and (reduced, new_pending) = reduce body arglist prog div
+  in (fname, (List.map (fun (x,y) -> x) arglist, reduced))::specialize_func (tl pending @ new_pending) prog div
+
+
+  (*
+   * Evaluate a static expression, returning Val(v)
+   *)
+let eval_expr e env = Val(v);;
+
+
+  (*
+   * Do we check for type errors? Like undefined variables? Assume no
+   *)
+let rec reduce e env prog div =
+  let reduce_var x env = 
+    (match (List.assoc x env) with
+        | Some v -> (v, [])
+        | None -> (Var(x), [])
+        | _ -> raise EvalError("Error Division")
+    )
+  and reduce_call fname args env prog div =
+    (
+      let (fbody,formal_list) = List.assoc fname prog
+      and reduce_arg (actual_list,pending_list) arg =
+        (
+          let (reduced_arg, new_pending) = reduce arg env prog div
+          in match reduced_arg with
+            | Val(v) -> (Some reduced_arg :: actual_list, pending_list @ new_pending)
+            | _ -> (None :: actual_list, pending_list @ new_pending)
+        )
+      in
+      (
+        let (actual_list,new_pending) = List.fold_left reduce_args ([],[]) arg
+        and reduce_call_d name actual_list new_pending = 
+          (
+            let new_name = residual_name name actual_list
+            and dyn_list = static_filter actual_list
+            in (Call (new_name, dyn_list), (new_name, dyn_list, fbody) :: new_pending)
+          )
+        in match snd(List.assoc fname div) with
+          | S -> (eval_expr fbody actual_list, new_pending)
+          | D -> reduce_call_d fname actual_list new_pending
+          | _ -> raise EvalError("No such binding")
+      )
+    )
+  and reduce_if e1 e2 e3 env prog div =
+    (
+      let (reduced1, pending1) = reduce e1 env prog div
+      and (reduced2, pending2) = reduce e2 env prog div
+      and (reduced3, pending3) = reduce e3 env prog div
+      in match (reduced1,reduced2,reduced3) with
+        | (Val(true), _, _) -> (reduced2, pending2)
+        | (Val(false), _, _) -> (reduced3, pending3)
+        | _ -> (If (reduced1, reduced2, reduced3), pending1 @ pending2 @ pending3)
+    )
+  and reduce_bin op e1 e2 env prog div =
+    (
+      let (reduced1, pending1) = reduce e1 env prog div
+      and (reduced2, pending2) = reduce e2 env prog div
+      in match(reduced1,reduced2) with
+        | (Val(v1),Val(v2)) -> (eval_expr Binop(op, reduced1, reduced2) env, [])
+        | _ -> (Binop(op, reduced1, reduced2), pending1 @ pending2)
+    )
+  and reduce_un op e1 env prog div =
+    (
+      let (reduced1, pending1) = reduce e1 env prog div
+      in match(reduced1) with
+        | Val(v1) -> (eval_expr Unop(op, reduced1) env, [])
+        | _ -> (Binop(op, reduced1), pending1)
+    )
+  in match e with
+    | Val(v) -> (Val(v), [])
+    | Var(x) -> (reduce_var x env)
+    | Call(fname, args) -> (reduce_call fname args env prog div)
+    | If(e1,e2,e3) -> (reduce_if e1 e2 e3 env prog div)
+    | Binop(op,e1,e2) -> (reduce_bin op e1 e2 env prog div)
+    | Unop(op, e1) -> (reduce_un op e1 env prog div)
+    | _ -> raise EvalError("no such type")
+
