@@ -47,9 +47,10 @@ let rec bind_expr_fn (e:expr) (tao:btenv) (g:string) (gtao:btenv) (d:div) (if_dy
 	|If(e1,e2,e3) -> (*consider dynamic if*)
 		         let condition_type = bind_expr e1 tao d in
 	                 let is_dynamic= condition_type = D in
-			 let r1 = bind_expr_fn e1 tao g gtao d is_dynamic in
-			 let r2 = bind_expr_fn e2 tao g gtao d is_dynamic in
-			 let r3 = bind_expr_fn e3 tao g gtao d is_dynamic in
+			 let is_dynamic_union = (is_dynamic || if_dynamic) in
+			 let r1 = bind_expr_fn e1 tao g gtao d is_dynamic_union in
+			 let r2 = bind_expr_fn e2 tao g gtao d is_dynamic_union in
+			 let r3 = bind_expr_fn e3 tao g gtao d is_dynamic_union in
 			 
 			 list_union r1 (list_union r2 r3) 
 	
@@ -211,9 +212,6 @@ let bind_time_analysis (prog:program) :division =
 			let _ = bind_expr (List.assoc name name_expr) bt d
 			in
 			if has_dynamic then (bt,D) else
-			(*
-			(bt,expr_type)
-			*)(*!!!!!!!!!!!!!!!*)
 			(bt,S)
 			)
 		in
