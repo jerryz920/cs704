@@ -208,7 +208,7 @@ let bind_time_analysis (prog:program) :division =
 			in
 			let has_dynamic = List.exists (fun x -> x=D) bindings   (*fixing this point--if any formal of a function is Dynamic, then the fucntion's type is also Dynamic*)
 			in 
-			let expr_type = bind_expr (List.assoc name name_expr) bt d
+			let _ = bind_expr (List.assoc name name_expr) bt d
 			in
 			if has_dynamic then (bt,D) else
 			(*
@@ -221,10 +221,10 @@ let bind_time_analysis (prog:program) :division =
 	in
 	get_divison final_div fe
 	;;
-let specialize (prog:program) (div:division): program = []
 
 (* the pending functions *)
 type env = (string * expr) list
+type penv = (string * expr option) list
 
   (*
    * Some utility functions
@@ -236,60 +236,73 @@ let make_env name_list val_list: env = List.combine name_list val_list
 let part_env name_list val_list (fdiv: bind_time_env) = 
   let total_env = make_env name_list val_list
   and arg_div = fst fdiv
-  in let collect (s_env, d_env) (k,v) =
+  in let collect (k,v) (s_env, d_env) =
     (
       if List.assoc k arg_div == S then
-        (k,v) : s_env
+        ((k,v) :: s_env, d_env)
       else
-        (k,v) : d_env
+        (s_env, (k,v) :: d_env)
     ) in
-    List.fold_left collect ([],[]) total_env
+    List.fold_right collect total_env ([],[]) 
 ;;
 
-let get_names env_list = List.map (fun (k,v) -> k) env_list
+let get_names env_list = List.map (fun (k,_) -> k) env_list
 ;;
-let get_vals env_list = List.map (fun (k,v) -> v) env_list
+let get_vals env_list = List.map (
+  fun (k,v) -> match v with 
+    | Val(x) -> x
+    | _ -> raise (EvalError "can not evaluate non value expr")
+  ) env_list
+;;
+let get_expr_vals env_list = List.map (fun (k,v) -> v) env_list
 ;;
 
 let get_fdiv fname div prog =
   if List.mem_assoc fname div then
     List.assoc fname div
   else
-    let arglist = List.assoc fname prog
+    let arglist = fst(List.assoc fname prog)
     in (List.map (fun n -> (n, D)) arglist, D)
 ;;
 
-
-let rec specialize_func (pending: (string * env * env * expr) list)  prog div =
-  let (fname, s_env, d_env, body) = hd pending
-  and (reduced, new_pending) = reduce body (s_env @ d_env) prog div
-  in (fname, (get_names d_env, reduced))::specialize_func (tl pending @ new_pending) prog div
+let rec print_env_list l =
+  if List.length l > 0 then
+  (print_string (fst (List.hd l)); print_string "="; print_expr (snd (List.hd l)); print_string " "; print_env_list (List.tl l); print_string "\n")
+  else
+    print_string "\n"
 ;;
 
+let rec print_expr_list l =
+  if List.length l > 0 then
+    (print_expr (List.hd l); print_string ","; print_expr_list (List.tl l);
+    print_string "\n";)
+  else
+    print_string "\n"
+;;
 
 (*
  *      We ensure only expr inside
  *)
-let eval_expr expr: value =
+let eval_expr expr: expr =
   let eval_bin_expr op v1 v2 =
     (
       match op, v1, v2 with
       | Cons, _, _ -> Pair(v1,v2)
       | Plus,(Number i1),(Number i2) -> Number (i1 + i2)
-      | Minus,(Number i1),(Number i2) -> Number (i1 + i2)
-      | Times,(Number i1),(Number i2) -> Number (i1 + i2)
-      | Div,(Number i1),(Number i2) -> Number (i1 + i2)
-      | Mod,(Number i1),(Number i2) -> Number (i1 + i2)
-      | Equals,(Number i1),(Number i2) -> Boolean (i1 == i2)
-      | Equals,(Boolean b1),(Boolean b2) -> Boolean (b1 == b2)
-      | Equals,(Symbol s1),(Symbol s2) -> Boolean (s1 == s2)
-      | Equals,(Pair (pv1,pv2)),(Pair (pv3,pv4)) -> Boolean (pv1 == pv3 && pv2 == pv4)
+      | Minus,(Number i1),(Number i2) -> Number (i1 - i2)
+      | Times,(Number i1),(Number i2) -> Number (i1 * i2)
+      | Div,(Number i1),(Number i2) -> Number (i1 / i2)
+      | Mod,(Number i1),(Number i2) -> Number (i1 mod i2)
+      | Equals,(Number i1),(Number i2) -> Boolean (i1 = i2)
+      | Equals,(Boolean b1),(Boolean b2) -> Boolean (b1 = b2)
+      | Equals,(Symbol s1),(Symbol s2) -> Boolean (s1 = s2)
+      | Equals,(Pair (pv1,pv2)),(Pair (pv3,pv4)) -> Boolean (pv1 = pv3 && pv2 = pv4)
       | Equals,_,_ -> Boolean(false)
       | LessThan,(Number i1),(Number i2) -> Boolean (i1 < i2)
       | LessThan,(Symbol s1),(Symbol s2) -> Boolean (s1 < s2)
       | GreaterThan,(Number i1),(Number i2) -> Boolean (i1 > i2)
       | GreaterThan,(Symbol s1),(Symbol s2) -> Boolean (s1 > s2)
-      | _,_,_ -> raise EvalError("can not evaluate bin expr")
+      | _,_,_ -> raise (EvalError "can not evaluate bin expr")
     )
   and eval_un_expr op v =
     (
@@ -298,56 +311,59 @@ let eval_expr expr: value =
       | Car,Nil -> Nil
       | Cdr,Pair(_,v2) -> v2
       | Cdr,Nil -> Nil
-      | IsNil Nil -> Boolean (true)
-      | IsNil _ -> Boolean (false)
-      | _,_ -> raise EvalError("can not evaluate un expr")
+      | IsNil,Nil -> Boolean (true)
+      | IsNil,_ -> Boolean (false)
+      | _,_ -> raise (EvalError "can not evaluate un expr")
     )
   in match expr with
    | Binop(op, Val(v1), Val(v2)) -> Val (eval_bin_expr op v1 v2)
    | Unop(op, Val(v)) -> Val (eval_un_expr op v)
+   | _ -> raise (EvalError "can not evaluate non-op expr")
+;;
 
 
   (*
    * Do we check for type errors? Like undefined variables? Assume no
    *)
-let rec reduce e (env_list: env) prog div =
+let rec reduce e prepared_env prog div: (expr * 'residual_functype list)=
   let reduce_var x exp_env = 
     (match (List.assoc x exp_env) with
-        | Some v -> (v, [])  (* Static value *)
-        | None -> (Var(x), []) (* Dynamic, return itself *)
-        | _ -> raise EvalError("Error Division")
+        | Some v ->  (v, [])  (* Static value *)
+        | None ->  (Var(x), []) (* Dynamic, return itself *)
     )
   and reduce_if e1 e2 e3 exp_env prog div =
     (
       let (reduced1, pending1) = reduce e1 exp_env prog div
-      and (reduced2, pending2) = reduce e2 exp_env prog div
-      and (reduced3, pending3) = reduce e3 exp_env prog div
-      in match (reduced1,reduced2,reduced3) with
-        | (Val(true), _, _) -> (reduced2, pending2)
-        | (Val(false), _, _) -> (reduced3, pending3)
-        | _ -> (If (reduced1, reduced2, reduced3), pending1 @ pending2 @ pending3)
+      and branch2 = lazy (reduce e2 exp_env prog div)
+      and branch3 = lazy (reduce e3 exp_env prog div)
+      in match (reduced1) with
+        | Val Boolean(true) -> Lazy.force branch2
+        | Val Boolean(false) -> Lazy.force branch3
+        | _ -> let (reduced2,pending2) = Lazy.force branch2
+               and (reduced3,pending3) = Lazy.force branch3
+               in (If (reduced1, reduced2, reduced3), pending1 @ pending2 @ pending3)
     )
   and reduce_bin op e1 e2 exp_env prog div =
     (
       let (reduced1, pending1) = reduce e1 exp_env prog div
       and (reduced2, pending2) = reduce e2 exp_env prog div
       in match(reduced1,reduced2) with
-        | (Val(v1),Val(v2)) -> eval_expr Binop(op, reduced1, reduced2)
+        | (Val(v1),Val(v2)) -> (eval_expr (Binop(op, reduced1, reduced2)), [])
         | _ -> (Binop(op, reduced1, reduced2), pending1 @ pending2)
     )
   and reduce_un op e1 exp_env prog div =
     (
       let (reduced1, pending1) = reduce e1 exp_env prog div
       in match(reduced1) with
-        | Val(v1) -> eval_expr Unop(op, reduced1)
-        | _ -> (Binop(op, reduced1), pending1)
+        | Val(v1) -> (eval_expr (Unop(op, reduced1)), [])
+        | _ -> (Unop(op, reduced1), pending1)
     )
   and reduce_call fname args exp_env prog div =
     (
       let (argnames, fbody) = List.assoc fname prog
-      and reduce_arg (argvals,pending_funcs) arg =
+      and reduce_arg arg (argvals,pending_funcs) =
         (
-          let (reduced_arg, new_pending_funcs) = reduce arg env prog div
+          let (reduced_arg, new_pending_funcs) = reduce arg exp_env prog div
           in (reduced_arg :: argvals, pending_funcs @ new_pending_funcs)
         )
       in
@@ -360,34 +376,55 @@ let rec reduce e (env_list: env) prog div =
        * If this call is dynamic, we generate a Call with proper arguments
        *   and insert a new function to pending list
        *)
-        let (argvals,pending_funcs) = List.fold_left reduce_args ([],[]) arg
+        let (argvals,pending_funcs) = List.fold_right reduce_arg args ([],[])
         and fdiv = get_fdiv fname div prog
         in
           (
-            let (s_env, d_env) = part_env argvals argnames fdiv
-            and prepared_senv = List.map (fun (k,v) -> (k, Some v)) s_env
-            and prepared_denv = List.map (fun (k,v) -> (k, None)) d_env
-            in match (snd fdiv) with
-              | S -> reduce fbody (prepared_senv @ prepared_denv) prog div
-              | D -> 
-                (
-                  let new_name = residue_name name (get_vals s_env)
-                  in 
-                    (
-                      Call (new_name, get_vals d_env),
-                      (new_name, prepared_senv, prepared_denv, fbody)
-                    )
-                )
-              | _ -> raise EvalError("No such division information")
+            let (s_env, d_env) = part_env argnames argvals fdiv
+            in
+              (let prepared_senv = List.map (fun (k,v) -> (k, Some v)) s_env
+               and prepared_denv = List.map (fun (k,v) -> (k, None)) d_env
+               in match (snd fdiv) with
+                 | S -> reduce fbody (prepared_senv @ prepared_denv) prog div
+                 | D -> 
+                   (
+                     (* Note we actually should check if this name already there *)
+                     let new_name = residue_name fname (get_vals s_env)
+                     in 
+                       (
+                         Call (new_name, get_expr_vals d_env),
+                         (new_name, prepared_senv, prepared_denv, fbody)::pending_funcs
+                       )
+                   )
+              )
           )
         )
     )
-  in match e with
+  in
+  match e with
     | Val(v) -> (Val(v), [])
-    | Var(x) -> (reduce_var x env_list)
-    | Call(fname, args) -> (reduce_call fname args env_list prog div)
-    | If(e1,e2,e3) -> (reduce_if e1 e2 e3 env_list prog div)
-    | Binop(op,e1,e2) -> (reduce_bin op e1 e2 env_list prog div)
-    | Unop(op, e1) -> (reduce_un op e1 env_list prog div)
-    | _ -> raise EvalError("no such type")
+    | Var(x) -> (reduce_var x prepared_env)
+    | Call(fname, args) -> (reduce_call fname args prepared_env prog div)
+    | If(e1,e2,e3) -> (reduce_if e1 e2 e3 prepared_env prog div)
+    | Binop(op,e1,e2) -> (reduce_bin op e1 e2 prepared_env prog div)
+    | Unop(op, e1) -> (reduce_un op e1 prepared_env prog div)
+;;
 
+let rec specialize_func (pending: (string * penv * penv * expr) list) prog div processed =
+  if List.length pending = 0 then
+    []
+  else
+    let (fname, s_env, d_env, body) = List.hd pending
+    in
+      if List.mem fname processed then
+        specialize_func (List.tl pending) prog div processed
+      else (
+        let (reduced, new_pending) = reduce body (s_env @ d_env) prog div
+        in (fname, (get_names d_env, reduced))::specialize_func (List.tl pending @ new_pending) prog div (fname::processed)
+      )
+;;
+
+let specialize (prog:program) (div:division): program = 
+  let main_func = List.assoc "main" prog
+  in specialize_func [("main", [], List.map (fun x-> (x,None)) (fst main_func), snd main_func)] prog div []
+;;
